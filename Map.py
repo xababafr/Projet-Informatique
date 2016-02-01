@@ -26,4 +26,4 @@ M = [
     '00011203000103'
 ]
 
-afficher_map(M) #yolo
+afficher_map(M)
