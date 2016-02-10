@@ -8,12 +8,12 @@ class Animal(object):
         self.__y=ordonnee
         self.__faim=faim
         self.__soif=soif
-        self.__vie=vie
+        self.__vie=vie #esperance de vie = age
         self.__vision=vision
         self.__fertilite=fertilite
         
     def mort(self): # Le suffixe M indique qu'un animal est mort
-        vie=0
+        self.vie=0
         if designation=='Herb':
             if vie > 200:   # Vie d'un Herbivore = 200
                 designation=designation+'M'
