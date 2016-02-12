@@ -1,5 +1,5 @@
 import numpy as np
-2 from abc import ABCMeta , abstractmethod
+from abc import ABCMeta , abstractmethod
 
 # on mettra ces deux imports dans le futur fichier "final"
 
@@ -99,6 +99,12 @@ class Animal():
         if y > MAP.dim:
             y = MAP.dim
         self.position = (x,y)
+
+    # enfin, je met l'etat actuel en lecture seule, on a pas trop envie que ce parametre soit bidouille
+    @property 
+    def etat(self):
+        # suppose la surcharge de __str__ dans chaque etat
+        return(str(self.etat))
 
     def __str__(self):
         texte = 'faim : {} \nsoif : {} \nvision : {} \nvitesse : {} \nvie : {} \nposition : {}\nrang : {}\netat : {} \n'.format(self.faim,self.soif,self.vision,self.vitesse,self.vie,self.position,self.rang,self.etat)
@@ -217,6 +223,16 @@ class Animal():
         return predateur_trouve
         
 
+    def deplacements_possibles(self):
+        """
+            checke toutes les cases autour de l'animal, et renvoi la position de celles qui ne sont pas de l'eau, 
+            donc celles sur lesquelles il peux se deplacer
+            Pour une premiere approximation, on dira que l'on peux meme marcher sur l'eau( juste des petites mares)
+        """
+
+        # a ecrire
+
+        pass
 
 
 
@@ -225,8 +241,10 @@ class Animal():
 class Herbivore(Animal):
     
     # on dit que une intération représente 1H, et donc 1J = 24 tours
+    # l'etat es une instance de Normal_herbivore, dont on passe en argument l'animal ayant le comportement concerne
+    # le comportement a ainsi acces a toutes les methodes et attribut de l'animal, ce qui lui permet de prendre des descisions
     def __init__(self,faim,soif,position,rang,etat):
-        super.__init__(24,24,3,1,120,position,rang,etat)
+        super.__init__(24,24,3,1,120,position,rang,Herbivore_normal(self))
         
     # a surcharger
     def is_herbivore(self):
@@ -256,7 +274,7 @@ class Herbivore(Animal):
 class Solitaire(Animal):
     # le predateur solitaire se deplace vite et a une grande vision, mais a une durée de vie plus faible que les herbivores
     def __init__(self,faim,soif,position,rang,etat):
-        super.__init__(24,24,6,3,72,position,rang,etat)
+        super.__init__(24,24,6,3,72,position,rang,Solitaire_normal(self))
         
     # est une predateur
     def is_herbivore(self):
@@ -291,7 +309,7 @@ class Meute(Animal):
     # le predateur en leute se deplace vite et a une vision moyenne, mais a une durée de vie plus faible que les herbivores
     # il ne faut pas leur donner une vue trop forte, sinon, il vont raser des troupeaux d'herbivores tout le temps
     def __init__(self,faim,soif,position,rang,etat):
-        super.__init__(24,24,4,2,96,position,rang,etat)
+        super.__init__(24,24,4,2,96,position,rang,Meute_normal(self))
         
     # est une predateur
     def is_herbivore(self):
