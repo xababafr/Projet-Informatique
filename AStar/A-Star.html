@@ -1,0 +1,629 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0092)http://www.laurentluce.com/posts/solving-mazes-using-python-simple-recursivity-and-a-search/ -->
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>  Solving mazes using Python: Simple recursivity and A* search | Laurent Luce's Blog</title>
+<meta name="description" content="  Solving mazes using Python: Simple recursivity and A* search">
+<meta name="keywords" content="  Solving mazes using Python: Simple recursivity and A* search">
+<link rel="stylesheet" type="text/css" href="./A-Star_files/style.css" media="screen">
+<link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="http://www.laurentluce.com/feed/">
+<link rel="pingback" href="http://www.laurentluce.com/xmlrpc.php">
+<link rel="alternate" type="application/rss+xml" title="Laurent Luce&#39;s Blog » Solving mazes using Python: Simple recursivity and A* search Comments Feed" href="http://www.laurentluce.com/posts/solving-mazes-using-python-simple-recursivity-and-a-search/feed/">
+		<script type="text/javascript" async="" src="./A-Star_files/ga.js"></script><script type="text/javascript">
+			window._wpemojiSettings = {"baseUrl":"https:\/\/s.w.org\/images\/core\/emoji\/72x72\/","ext":".png","source":{"concatemoji":"http:\/\/www.laurentluce.com\/wp-includes\/js\/wp-emoji-release.min.js?ver=4.4.2"}};
+			!function(a,b,c){function d(a){var c,d=b.createElement("canvas"),e=d.getContext&&d.getContext("2d"),f=String.fromCharCode;return e&&e.fillText?(e.textBaseline="top",e.font="600 32px Arial","flag"===a?(e.fillText(f(55356,56806,55356,56826),0,0),d.toDataURL().length>3e3):"diversity"===a?(e.fillText(f(55356,57221),0,0),c=e.getImageData(16,16,1,1).data.toString(),e.fillText(f(55356,57221,55356,57343),0,0),c!==e.getImageData(16,16,1,1).data.toString()):("simple"===a?e.fillText(f(55357,56835),0,0):e.fillText(f(55356,57135),0,0),0!==e.getImageData(16,16,1,1).data[0])):!1}function e(a){var c=b.createElement("script");c.src=a,c.type="text/javascript",b.getElementsByTagName("head")[0].appendChild(c)}var f,g;c.supports={simple:d("simple"),flag:d("flag"),unicode8:d("unicode8"),diversity:d("diversity")},c.DOMReady=!1,c.readyCallback=function(){c.DOMReady=!0},c.supports.simple&&c.supports.flag&&c.supports.unicode8&&c.supports.diversity||(g=function(){c.readyCallback()},b.addEventListener?(b.addEventListener("DOMContentLoaded",g,!1),a.addEventListener("load",g,!1)):(a.attachEvent("onload",g),b.attachEvent("onreadystatechange",function(){"complete"===b.readyState&&c.readyCallback()})),f=c.source||{},f.concatemoji?e(f.concatemoji):f.wpemoji&&f.twemoji&&(e(f.twemoji),e(f.wpemoji)))}(window,document,window._wpemojiSettings);
+		</script><style type="text/css"></style><script src="./A-Star_files/wp-emoji-release.min.js" type="text/javascript"></script>
+		<style type="text/css">
+img.wp-smiley,
+img.emoji {
+	display: inline !important;
+	border: none !important;
+	box-shadow: none !important;
+	height: 1em !important;
+	width: 1em !important;
+	margin: 0 .07em !important;
+	vertical-align: -0.1em !important;
+	background: none !important;
+	padding: 0 !important;
+}
+</style>
+<!-- This site uses the Google Analytics by Yoast plugin v5.4.6 - Universal disabled - https://yoast.com/wordpress/plugins/google-analytics/ -->
+<script type="text/javascript">
+
+	var _gaq = _gaq || [];
+	_gaq.push(['_setAccount', 'UA-12599046-1']);
+	_gaq.push(['_gat._forceSSL']);
+	_gaq.push(['_trackPageview']);
+
+	(function () {
+		var ga = document.createElement('script');
+		ga.type = 'text/javascript';
+		ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0];
+		s.parentNode.insertBefore(ga, s);
+	})();
+
+</script>
+<!-- / Google Analytics by Yoast -->
+<link rel="https://api.w.org/" href="http://www.laurentluce.com/wp-json/">
+<link rel="EditURI" type="application/rsd+xml" title="RSD" href="http://www.laurentluce.com/xmlrpc.php?rsd">
+<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="http://www.laurentluce.com/wp-includes/wlwmanifest.xml"> 
+<link rel="prev" title="Python threads synchronization: Locks, RLocks, Semaphores, Conditions, Events and Queues" href="http://www.laurentluce.com/posts/python-threads-synchronization-locks-rlocks-semaphores-conditions-events-and-queues/">
+<link rel="next" title="Python list implementation" href="http://www.laurentluce.com/posts/python-list-implementation/">
+<meta name="generator" content="WordPress 4.4.2">
+<link rel="canonical" href="http://www.laurentluce.com/posts/solving-mazes-using-python-simple-recursivity-and-a-search/">
+<link rel="shortlink" href="http://www.laurentluce.com/?p=264">
+<link rel="alternate" type="application/json+oembed" href="http://www.laurentluce.com/wp-json/oembed/1.0/embed?url=http%3A%2F%2Fwww.laurentluce.com%2Fposts%2Fsolving-mazes-using-python-simple-recursivity-and-a-search%2F">
+<link rel="alternate" type="text/xml+oembed" href="http://www.laurentluce.com/wp-json/oembed/1.0/embed?url=http%3A%2F%2Fwww.laurentluce.com%2Fposts%2Fsolving-mazes-using-python-simple-recursivity-and-a-search%2F&amp;format=xml">
+<link rel="stylesheet" type="text/css" href="./A-Star_files/shCore.css"><link rel="stylesheet" type="text/css" href="./A-Star_files/shThemeEclipse.css"><style type="text/css" id="syntaxhighlighteranchor"></style>
+</head>
+
+<body>
+<div align="center">
+<div id="wrapper">
+<div id="doc1" class="yui-t4">
+<div id="hd">
+	<div id="sitemeta">
+		<ul>
+     			     			<li><a href="http://www.laurentluce.com/wp-login.php">Log in</a></li>
+     			     			<li class="rss"><a href="http://www.laurentluce.com/feed/">Subscribe RSS Feed</a></li>
+  		</ul>
+	</div>
+	<div id="titlewrapper">
+		<div id="blogtitle">
+			<h1><a href="http://www.laurentluce.com/">Laurent Luce's Blog</a></h1>
+		</div>
+		<div id="menu">
+			<ul>
+				<li><div id="blogdescription">Technical blog on web technologies</div></li>
+				<li><a href="http://www.laurentluce.com/">Home</a></li>
+				<li class="page_item page-item-2"><a href="http://www.laurentluce.com/about/">About</a></li>
+			</ul>
+		</div>
+	</div>
+	<div id="newsflash">
+                
+	</div>
+	<div class="clear">&nbsp;</div>
+</div>
+
+<div id="sidebar" class="yui-b">
+<ul class="sidebar">
+		<li id="recent-posts-4" class="widget widget_recent_entries">		<h2 class="widgettitle">Recent Posts</h2>
+		<ul>
+					<li>
+				<a href="http://www.laurentluce.com/posts/least-frequently-used-cache-eviction-scheme-with-complexity-o1-in-python/">Least frequently used cache eviction scheme with complexity O(1) in Python</a>
+						</li>
+					<li>
+				<a href="http://www.laurentluce.com/posts/cambridge-city-geospatial-statistics/">Cambridge city geospatial statistics</a>
+						</li>
+					<li>
+				<a href="http://www.laurentluce.com/posts/api-to-access-the-cambridge-city-geospatial-data/">API to access the Cambridge city geospatial data</a>
+						</li>
+					<li>
+				<a href="http://www.laurentluce.com/posts/rest-service-python-client-to-access-geographic-data/">REST service + Python client to access geographic data</a>
+						</li>
+					<li>
+				<a href="http://www.laurentluce.com/posts/massachusetts-census-2010-towns-maps-and-statistics-using-python/">Massachusetts Census 2010 Towns maps and statistics using Python</a>
+						</li>
+					<li>
+				<a href="http://www.laurentluce.com/posts/python-twitter-statistics-and-the-2012-french-presidential-election/">Python, Twitter statistics and the 2012 French presidential election</a>
+						</li>
+					<li>
+				<a href="http://www.laurentluce.com/posts/twitter-sentiment-analysis-using-python-and-nltk/">Twitter sentiment analysis using Python and NLTK</a>
+						</li>
+					<li>
+				<a href="http://www.laurentluce.com/posts/python-dictionary-implementation/">Python dictionary implementation</a>
+						</li>
+					<li>
+				<a href="http://www.laurentluce.com/posts/python-string-objects-implementation/">Python string objects implementation</a>
+						</li>
+					<li>
+				<a href="http://www.laurentluce.com/posts/python-integer-objects-implementation/">Python integer objects implementation</a>
+						</li>
+				</ul>
+		</li>
+		<li id="search-3" class="widget widget_search"><h2 class="widgettitle">Search</h2>
+<form method="get" id="searchform" action="http://www.laurentluce.com/">
+<input type="text" size="14" value="" name="s" id="s" class="s">
+<input type="submit" id="searchsubmit" value="GO">
+</form></li>
+<li id="meta-3" class="widget widget_meta"><h2 class="widgettitle">Meta</h2>
+			<ul>
+						<li><a href="http://www.laurentluce.com/wp-login.php">Log in</a></li>
+			<li><a href="http://www.laurentluce.com/feed/">Entries <abbr title="Really Simple Syndication">RSS</abbr></a></li>
+			<li><a href="http://www.laurentluce.com/comments/feed/">Comments <abbr title="Really Simple Syndication">RSS</abbr></a></li>
+			<li><a href="https://wordpress.org/" title="Powered by WordPress, state-of-the-art semantic personal publishing platform.">WordPress.org</a></li>			</ul>
+			</li>
+</ul>
+</div>
+
+<div id="bd" class="single">
+<div id="yui-main"><div class="yui-b">
+	<div class="post-wrap" id="post">
+		<h1 class="post-title"><a href="http://www.laurentluce.com/posts/solving-mazes-using-python-simple-recursivity-and-a-search/" rel="bookmark" title="Permanent Link to Solving mazes using Python: Simple recursivity and A* search">Solving mazes using Python: Simple recursivity and A* search</a></h1>
+	                <div>March 10, 2011</div> 
+			<div class="story-content">
+			<p>This post describes how to solve mazes using 2 algorithms implemented in Python: a simple recursive algorithm and the A* search algorithm.</p>
+<h2>Maze</h2>
+<p>The maze we are going to use in this article is 6 cells by 6 cells. The walls are colored in blue. The starting  cell is at the bottom left (x=0 and y=0) colored in green. The ending cell is at the top right (x=5 and y=5) colored in green. We can only move horizontally or vertically 1 cell at a time.</p>
+<p><img src="./A-Star_files/maze.png" alt="Python algorithms for mazes"></p>
+<h2>Recursive walk</h2>
+<p>We use a nested list of integers to represent the maze. The values are the following:</p>
+<ul>
+<li>0: empty cell</li>
+<li>1: unreachable cell: e.g. wall</li>
+<li>2: ending cell</li>
+<li>3: visited cell</li>
+</ul>
+<pre class="brush: python; title: ; notranslate" title="">grid = [[0, 0, 0, 0, 0, 1],
+        [1, 1, 0, 0, 0, 1],
+        [0, 0, 0, 1, 0, 0],
+        [0, 1, 1, 0, 0, 1],
+        [0, 1, 0, 0, 1, 0],
+        [0, 1, 0, 0, 0, 2]]
+</pre>
+<p>This is a very simple algorithm which does the job even if it is not an efficient algorithm. It walks the maze recursively by visiting each cell and avoiding walls and already visited cells.</p>
+<p>The search function accepts the coordinates of a cell to explore. If it is the ending cell, it returns True. If it is a wall or an already visited cell, it returns False. The neighboring cells are explored recursively and if nothing is found at the end, it returns False so it backtracks to explore new paths. We start at cell x=0 and y=0.</p>
+<pre class="brush: python; title: ; notranslate" title="">def search(x, y):
+    if grid[x][y] == 2:
+        print 'found at %d,%d' % (x, y)
+        return True
+    elif grid[x][y] == 1:
+        print 'wall at %d,%d' % (x, y)
+        return False
+    elif grid[x][y] == 3:
+        print 'visited at %d,%d' % (x, y)
+        return False
+    
+    print 'visiting %d,%d' % (x, y)
+
+    # mark as visited
+    grid[x][y] = 3
+
+    # explore neighbors clockwise starting by the one on the right
+    if ((x &lt; len(grid)-1 and search(x+1, y))
+        or (y &gt; 0 and search(x, y-1))
+        or (x &gt; 0 and search(x-1, y))
+        or (y &lt; len(grid)-1 and search(x, y+1))):
+        return True
+
+    return False
+
+search(0, 0)
+</pre>
+<p>Let’s see what happens when we run the script.</p>
+<pre class="brush: bash; title: ; notranslate" title="">$ python maze.py
+visiting 0,0
+wall at 1,0
+visiting 0,1
+wall at 1,1
+visited at 0,0
+visiting 0,2
+...
+</pre>
+<p>First cell visited is (0,0). Its neighbors are explored starting by the one on the right (1,0). search(1,0) returns False because it is a wall. There is no cell below and on the left so the one at the top (0,1) is explored. Right of that is a wall and below is already visited so the one at the top (0,2) is explored. This is what we have so far:</p>
+<p><img src="./A-Star_files/maze_rec_1a.png" alt="Python algorithms for mazes"></p>
+<p>Because the neighbor on the right is explored first, this algorithm is going to explore the dead-end at the bottom-right first.</p>
+<pre class="brush: bash; title: ; notranslate" title="">...
+visiting 1,2
+visiting 2,2
+wall at 3,2
+visiting 2,1
+wall at 3,1
+visiting 2,0
+visiting 3,0
+visiting 4,0
+visiting 5,0
+...
+</pre>
+<p><img src="./A-Star_files/maze_rec_1b.png" alt="Python algorithms for mazes"></p>
+<p>The algorithm is going to backtrack because there is nothing else to explore as we are in a dead-end and we are going to end up at cell (1, 2) again where there is more to explore.</p>
+<pre class="brush: bash; title: ; notranslate" title="">...
+visited at 4,0
+wall at 5,1
+visited at 3,0
+wall at 4,1
+visited at 2,0
+wall at 3,1
+wall at 1,0
+visited at 2,1
+wall at 1,1
+visited at 2,2
+visited at 1,2
+wall at 2,3
+wall at 1,1
+visited at 0,2
+visiting 1,3
+...
+</pre>
+<p><img src="./A-Star_files/maze_rec_1c.png" alt="Python algorithms for mazes"></p>
+<p>Let’s continue, we end up in a second dead-end at cell (4, 2).</p>
+<pre class="brush: bash; title: ; notranslate" title="">...
+wall at 2,3
+visited at 1,2
+visiting 0,3
+visited at 1,3
+visited at 0,2
+visiting 0,4
+visiting 1,4
+visiting 2,4
+visiting 3,4
+wall at 4,4
+visiting 3,3
+visiting 4,3
+visiting 5,3
+visiting 5,2
+wall at 5,1
+visiting 4,2
+visited at 5,2
+wall at 4,1
+wall at 3,2
+visited at 4,3
+...
+</pre>
+<p><img src="./A-Star_files/maze_rec_2.png" alt="Python algorithms for mazes"></p>
+<p>Backtracking happens one more time to go back to cell (5, 3) and we are now on our way to the exit.</p>
+<pre class="brush: bash; title: ; notranslate" title="">...
+visiting 5,4
+visited at 5,3
+wall at 4,4
+found at 5,5
+</pre>
+<p><img src="./A-Star_files/maze_rec_3a.png" alt="Python algorithms for mazes"></p>
+<p>The full walk looks like this:</p>
+<p><img src="./A-Star_files/maze_rec_3b.png" alt="Python algorithms for mazes"></p>
+<h2>A* search</h2>
+<p>We are going to look at a more sophisticated algorithm called A* search. This is based on costs to move around the grid. Let’s assume the cost to move horizontally or vertically 1 cell is equal to 10. Again, we cannot move diagonally here.</p>
+<p>Before we start describing the algorithm, let’s define 2 variables: G and H. G is the cost to move from the starting cell to a given cell.</p>
+<p><img src="./A-Star_files/a_star_g.png" alt="Python algorithms for mazes"></p>
+<p>H is an estimation of the cost to move from a given cell to the ending cell. How do we calculate that if we don’t know the path to the ending cell? To simplify, we just calculate the distance if no walls were present. There are other ways to do the estimation but this one is good enough for this example.</p>
+<p><img src="./A-Star_files/a_star_h.png" alt="Python algorithms for mazes"></p>
+<p>We use 2 lists: an open list containing the cells to explore and a closed list containing the processed cells. We start with the starting cell in the open list and nothing in the closed list.</p>
+<p>Let’s follow 1 round of this algorithm by processing our first cell from the open list. It is the starting cell. We remove it from the list and append it to the closed list. We retrieve the list of adjacent cells and we start processing them. The starting cell has 2 adjacent cells: (1, 0) and (0, 1). (1, 0) is a wall so we drop that one. (0, 1) is reachable and not in the closed list so we process it. We calculate G and H for it. G = 10 as we just need to move 1 cell up from the starting cell. H = 90: 5 cells right and 4 cells up to reach the ending cell. We call the sum F = G + H = 10 + 90 = 100. We set the parent of this adjacent cell to be the cell we just removed from the open list: e.g. (0, 0). Finally, we add this adjacent cell to the open list. This is what we have so far. The arrow represents the pointer to the parent cell.</p>
+<p><img src="./A-Star_files/a_star_2.png" alt="Python algorithms for mazes"></p>
+<p>We continue with the cell in the open list having the lowest F = G + H. Only one cell is in the open list so it makes it easy. We remove it from the open list and we get its adjacent cells. Again, only one adjacent cell is reachable: (0, 2). We end up with the following after this 2nd round.</p>
+<p><img src="./A-Star_files/a_star_3.png" alt="Python algorithms for mazes"></p>
+<p>3nd round result looks like this. Cells in green are in the open list. Cells in red are in the closed list.</p>
+<p><img src="./A-Star_files/a_star_4.png" alt="Python algorithms for mazes"></p>
+<p>Let’s detail the next round. We have 2 cells in the open list: (1, 2) and (0, 3). Both have the same F value so we pick the last one added which is (0, 3). This cell has 3 reachable adjacent cells: (1, 3), (0, 2) and (0, 4). We process (1, 3) and (0, 4). (0, 2) is in the closed list so we don’t process that one again. We end up with:</p>
+<p><img src="./A-Star_files/a_star_5.png" alt="Python algorithms for mazes"></p>
+<p>Let’s fast forward to:</p>
+<p><img src="./A-Star_files/a_star_6.png" alt="Python algorithms for mazes"></p>
+<p>We have (1, 2), (1, 3) and (3, 3) in the open list. (1, 3) is processed next because it is the last one added with the lowest F value = 100. (1, 3) has 1 adjacent cell which is not in the closed list. It is (1, 2) which is in the open list. When an adjacent cell is in the open list, we check if its F value would be less if the path taken was going through the cell currently processed e.g. through (1, 3). Here it is not the case so we don’t update G and H of (1, 2) and its parent. This trick makes the algorithm more efficient when this condition exists.</p>
+<p>Let’s take a break and look at a diagram representing the algorithm steps and conditions:</p>
+<p><img src="./A-Star_files/a_star_1.png" alt="Python algorithms for mazes"></p>
+<p>We continue processing the cells remaining in the open list. Fast forward to:</p>
+<p><img src="./A-Star_files/a_star_7.png" alt="Python algorithms for mazes"></p>
+<p>We have 2 cells in the open list: (3, 3) and (2, 0). The next cell removed from the open list is (3, 3) because its F is equal to 120. This proves that this algorithm is better than the first one we saw. We don’t end up exploring the dead end at (5, 0) and we continue walking from (3, 3) instead which is better.</p>
+<p>Fast forward again to:</p>
+<p><img src="./A-Star_files/a_star_8.png" alt="Python algorithms for mazes"></p>
+<p>The next cell processed from the open list is (5, 5) and it is the ending cell so we have found our path. It is easy to display the path. We just have to follow the parent pointers up to the starting cell. Our path is highlighted in green on the following diagram:</p>
+<p><img src="./A-Star_files/a_star_9.png" alt="Python algorithms for mazes"></p>
+<p>You can read more about this algorithm <a href="http://en.wikipedia.org/wiki/A*_search_algorithm">here</a>.</p>
+<h2>A* implementation</h2>
+<p>The basic object here is a cell so we write a class for it. We store the coordinates x and y, the values of G and H plus the sum F.</p>
+<pre class="brush: python; title: ; notranslate" title="">class Cell(object):
+    def __init__(self, x, y, reachable):
+        """
+        Initialize new cell
+
+        @param x cell x coordinate
+        @param y cell y coordinate
+        @param reachable is cell reachable? not a wall?
+        """
+        self.reachable = reachable
+        self.x = x
+        self.y = y
+        self.parent = None
+        self.g = 0
+        self.h = 0
+        self.f = 0
+</pre>
+<p>Next is our main class named AStar. Attributes are the open list heapified (keep cell with lowest F at the top), the closed list which is a set for fast lookup, the cells list (grid definition) and the size of the grid.</p>
+<pre class="brush: python; title: ; notranslate" title="">class AStar(object):
+    def __init__(self):
+        self.opened = []
+        heapq.heapify(self.opened)
+        self.closed = set()
+        self.cells = []
+        self.grid_height = 6
+        self.grid_width = 6
+  ...
+</pre>
+<p>We create a simple method initializing the list of cells to match our example with the walls at the same locations.</p>
+<pre class="brush: python; title: ; notranslate" title="">    def init_grid(self):
+        walls = ((0, 5), (1, 0), (1, 1), (1, 5), (2, 3), 
+                 (3, 1), (3, 2), (3, 5), (4, 1), (4, 4), (5, 1))
+        for x in range(self.grid_width):
+            for y in range(self.grid_height):
+                if (x, y) in walls:
+                    reachable = False
+                else:
+                    reachable = True
+                self.cells.append(Cell(x, y, reachable))
+        self.start = self.get_cell(0, 0)
+        self.end = self.get_cell(5, 5)
+</pre>
+<p>Our heuristic compute method:</p>
+<pre class="brush: python; title: ; notranslate" title="">    def get_heuristic(self, cell):
+        """
+        Compute the heuristic value H for a cell: distance between
+        this cell and the ending cell multiply by 10.
+
+        @param cell
+        @returns heuristic value H
+        """
+        return 10 * (abs(cell.x - self.end.x) + abs(cell.y - self.end.y))
+</pre>
+<p>We need a method to return a particular cell based on x and y coordinates.</p>
+<pre class="brush: python; title: ; notranslate" title="">    def get_cell(self, x, y):
+        """
+        Returns a cell from the cells list
+
+        @param x cell x coordinate
+        @param y cell y coordinate
+        @returns cell
+        """
+        return self.cells[x * self.grid_height + y]
+</pre>
+<p>Next is a method to retrieve the list of adjacent cells to a specific cell.</p>
+<pre class="brush: python; title: ; notranslate" title="">    def get_adjacent_cells(self, cell):
+        """
+        Returns adjacent cells to a cell. Clockwise starting
+        from the one on the right.
+
+        @param cell get adjacent cells for this cell
+        @returns adjacent cells list 
+        """
+        cells = []
+        if cell.x &lt; self.grid_width-1:
+            cells.append(self.get_cell(cell.x+1, cell.y))
+        if cell.y &gt; 0:
+            cells.append(self.get_cell(cell.x, cell.y-1))
+        if cell.x &gt; 0:
+            cells.append(self.get_cell(cell.x-1, cell.y))
+        if cell.y &lt; self.grid_height-1:
+            cells.append(self.get_cell(cell.x, cell.y+1))
+        return cells
+</pre>
+<p>Simple method to print the path found. It follows the parent pointers to go from the ending cell to the starting cell.</p>
+<pre class="brush: python; title: ; notranslate" title="">    def display_path(self):
+        cell = self.end
+        while cell.parent is not self.start:
+            cell = cell.parent
+            print 'path: cell: %d,%d' % (cell.x, cell.y)
+</pre>
+<p>We need a method to calculate G and H and set the parent cell.</p>
+<pre class="brush: python; title: ; notranslate" title="">    def update_cell(self, adj, cell):
+        """
+        Update adjacent cell
+
+        @param adj adjacent cell to current cell
+        @param cell current cell being processed
+        """
+        adj.g = cell.g + 10
+        adj.h = self.get_heuristic(adj)
+        adj.parent = cell
+        adj.f = adj.h + adj.g
+</pre>
+<p>The main method implements the algorithm itself.</p>
+<pre class="brush: python; title: ; notranslate" title="">    def process(self):
+        # add starting cell to open heap queue
+        heapq.heappush(self.opened, (self.start.f, self.start))
+        while len(self.opened):
+            # pop cell from heap queue 
+            f, cell = heapq.heappop(self.opened)
+            # add cell to closed list so we don't process it twice
+            self.closed.add(cell)
+            # if ending cell, display found path
+            if cell is self.end:
+                self.display_path()
+                break
+            # get adjacent cells for cell
+            adj_cells = self.get_adjacent_cells(cell)
+            for adj_cell in adj_cells:
+                if adj_cell.reachable and adj_cell not in self.closed:
+                    if (adj_cell.f, adj_cell) in self.opened:
+                        # if adj cell in open list, check if current path is
+                        # better than the one previously found for this adj
+                        # cell.
+                        if adj_cell.g &gt; cell.g + 10:
+                            self.update_cell(adj_cell, cell)
+                    else:
+                        self.update_cell(adj_cell, cell)
+                        # add adj cell to open list
+                        heapq.heappush(self.opened, (adj_cell.f, adj_cell))
+</pre>
+<p>You can checkout the code on GitHub: git clone https://laurentluce@github.com/laurentluce/python-algorithms.git. </p>
+<p>That’s it for now. I hope you enjoyed the article. Please write a comment if you have any feedback.</p>
+			</div><!-- end post content -->
+		<div class="metawrap">
+		<p>
+			tags: <a href="http://www.laurentluce.com/posts/tag/python/" rel="tag">Python</a><br>			posted in <a href="http://www.laurentluce.com/posts/category/uncategorized/" rel="category tag">Uncategorized</a> by Laurent Luce					</p>
+
+		<p class="interact"> Follow comments via the <a href="http://www.laurentluce.com/posts/solving-mazes-using-python-simple-recursivity-and-a-search/feed/">RSS Feed</a> | <a href="http://www.laurentluce.com/posts/solving-mazes-using-python-simple-recursivity-and-a-search/#respond">Leave a comment</a> | <a href="http://www.laurentluce.com/posts/solving-mazes-using-python-simple-recursivity-and-a-search/trackback/">Trackback URL</a> </p>
+		</div><!-- end meta wrap -->
+	</div><!-- end post -->
+
+<!-- You can start editing here. -->
+<div id="commentwrap">
+<h3 id="comments">17 Comments to "Solving mazes using Python: Simple recursivity and A* search"</h3>
+	
+	<ol id="commentlist">
+					<li class="alt" id="comment-2918">
+			<p><img alt="" src="./A-Star_files/3cf8ae304409c53b006b47101fe61e34" srcset="http://0.gravatar.com/avatar/3cf8ae304409c53b006b47101fe61e34?s=64&amp;d=mm&amp;r=g 2x" class="avatar avatar-32 photo" height="32" width="32"><cite><a href="http://prologic.shortcircuit.net.au/" rel="external nofollow" class="url">James Mills</a></cite> wrote:</p>
+			<p>This is very nice. Good read!</p>
+<p>cheers<br>
+James</p>
+						<p class="commentmetadata"><a href="http://www.laurentluce.com/posts/solving-mazes-using-python-simple-recursivity-and-a-search/#comment-2918" title="">Link</a> | March 10th, 2011 at 6:19 pm </p>
+		</li>
+					<li class="authorpost" id="comment-2919">
+			<p><img alt="" src="./A-Star_files/a37d0d4170a049c8e4e34c1c34ea8ca6" srcset="http://1.gravatar.com/avatar/a37d0d4170a049c8e4e34c1c34ea8ca6?s=64&amp;d=mm&amp;r=g 2x" class="avatar avatar-32 photo" height="32" width="32"><cite>Laurent Luce</cite> wrote:</p>
+			<p>@James: Thanks!</p>
+						<p class="commentmetadata"><a href="http://www.laurentluce.com/posts/solving-mazes-using-python-simple-recursivity-and-a-search/#comment-2919" title="">Link</a> | March 10th, 2011 at 6:41 pm </p>
+		</li>
+					<li class="alt" id="comment-2925">
+			<p><img alt="" src="./A-Star_files/25f62466c4d6b00b595f935cd3058221" srcset="http://2.gravatar.com/avatar/25f62466c4d6b00b595f935cd3058221?s=64&amp;d=mm&amp;r=g 2x" class="avatar avatar-32 photo" height="32" width="32"><cite><a href="http://thereisanothersystem.blogspot.com/" rel="external nofollow" class="url">Evan</a></cite> wrote:</p>
+			<p>Excellent description and implemention of A*, well explained. Takes me back to my second year of university.</p>
+						<p class="commentmetadata"><a href="http://www.laurentluce.com/posts/solving-mazes-using-python-simple-recursivity-and-a-search/#comment-2925" title="">Link</a> | March 10th, 2011 at 10:49 pm </p>
+		</li>
+					<li class="" id="comment-2928">
+			<p><img alt="" src="./A-Star_files/240d6c0a68ccefda05a01270f540b36a" srcset="http://2.gravatar.com/avatar/240d6c0a68ccefda05a01270f540b36a?s=64&amp;d=mm&amp;r=g 2x" class="avatar avatar-32 photo" height="32" width="32"><cite>Rob M</cite> wrote:</p>
+			<p>Excellent article and great explanation. </p>
+<p>Maybe grid numbers next to the images would help when looking up coordinates repeatedly? Otherwise keep up the python articles!</p>
+						<p class="commentmetadata"><a href="http://www.laurentluce.com/posts/solving-mazes-using-python-simple-recursivity-and-a-search/#comment-2928" title="">Link</a> | March 11th, 2011 at 12:00 am </p>
+		</li>
+					<li class="alt" id="comment-2958">
+			<p><img alt="" src="./A-Star_files/9e36aeb20f1b4a763043d3ce4942b454" srcset="http://0.gravatar.com/avatar/9e36aeb20f1b4a763043d3ce4942b454?s=64&amp;d=mm&amp;r=g 2x" class="avatar avatar-32 photo" height="32" width="32"><cite><a href="http://alicebobandmallory.com/" rel="external nofollow" class="url">Jonas Elfström</a></cite> wrote:</p>
+			<p>I wonder how the algorithm would be affected by weave mazes? <a href="http://weblog.jamisbuck.org/2011/3/4/maze-generation-weave-mazes" rel="nofollow">http://weblog.jamisbuck.org/2011/3/4/maze-generation-weave-mazes</a></p>
+						<p class="commentmetadata"><a href="http://www.laurentluce.com/posts/solving-mazes-using-python-simple-recursivity-and-a-search/#comment-2958" title="">Link</a> | March 11th, 2011 at 3:46 pm </p>
+		</li>
+					<li class="" id="comment-3032">
+			<p><cite><a href="http://nerdson.com/blog/pale-blue-dot/" rel="external nofollow" class="url">Pale blue dot | Nerdson não vai à escola</a></cite> wrote:</p>
+			<p>[…] Solving mazes using Python: Simple recursivity and A* search […]</p>
+						<p class="commentmetadata"><a href="http://www.laurentluce.com/posts/solving-mazes-using-python-simple-recursivity-and-a-search/#comment-3032" title="">Link</a> | March 12th, 2011 at 6:22 pm </p>
+		</li>
+					<li class="alt" id="comment-3045">
+			<p><cite><a href="http://pabloidz.wordpress.com/2011/03/14/links-for-2011-03-14/" rel="external nofollow" class="url">links for 2011-03-14 « pabloidz</a></cite> wrote:</p>
+			<p>[…] Solving mazes using Python: Simple recursivity and A* search | Laurent Luce's Blog (tags: python)        TagsCategoriasmiudezas Uncategorized &nbsp; […]</p>
+						<p class="commentmetadata"><a href="http://www.laurentluce.com/posts/solving-mazes-using-python-simple-recursivity-and-a-search/#comment-3045" title="">Link</a> | March 14th, 2011 at 5:02 am </p>
+		</li>
+					<li class="" id="comment-3452">
+			<p><img alt="" src="./A-Star_files/3fc39bcb959820b7ad246a746c123ef0" srcset="http://0.gravatar.com/avatar/3fc39bcb959820b7ad246a746c123ef0?s=64&amp;d=mm&amp;r=g 2x" class="avatar avatar-32 photo" height="32" width="32"><cite>Robaht Hamma</cite> wrote:</p>
+			<p>Thanks for the detailed tutorial!</p>
+						<p class="commentmetadata"><a href="http://www.laurentluce.com/posts/solving-mazes-using-python-simple-recursivity-and-a-search/#comment-3452" title="">Link</a> | April 19th, 2011 at 11:52 am </p>
+		</li>
+					<li class="alt" id="comment-7220">
+			<p><img alt="" src="./A-Star_files/f369f7874cae2843f46279b3729d7c52" srcset="http://0.gravatar.com/avatar/f369f7874cae2843f46279b3729d7c52?s=64&amp;d=mm&amp;r=g 2x" class="avatar avatar-32 photo" height="32" width="32"><cite>Prasanna</cite> wrote:</p>
+			<p>Wonderfully explained.</p>
+						<p class="commentmetadata"><a href="http://www.laurentluce.com/posts/solving-mazes-using-python-simple-recursivity-and-a-search/#comment-7220" title="">Link</a> | November 1st, 2011 at 9:25 am </p>
+		</li>
+					<li class="" id="comment-28261">
+			<p><img alt="" src="./A-Star_files/fc9728417d539af2dfd2cc49f1b9ac34" srcset="http://0.gravatar.com/avatar/fc9728417d539af2dfd2cc49f1b9ac34?s=64&amp;d=mm&amp;r=g 2x" class="avatar avatar-32 photo" height="32" width="32"><cite>Markus</cite> wrote:</p>
+			<p>Hello,</p>
+<p>Thanks for this great tutorial. It really helped me understand the A* method. I know this post is now more than a year old, but I followed it now and noticed something that maybe I do not understand right or might be interesting for others to know:</p>
+<p>In the process function on line 17, I think that ‘if c in self.op:’ can never be true since self.op is actually a list of tuples, not a list of cell objects. This leads to the same cell being added multiple times to the open list and eventually slows the algorithm down or even creates an infinity loop in some situations. Am I missing something here or is this really a bug?</p>
+						<p class="commentmetadata"><a href="http://www.laurentluce.com/posts/solving-mazes-using-python-simple-recursivity-and-a-search/#comment-28261" title="">Link</a> | July 27th, 2012 at 4:02 am </p>
+		</li>
+					<li class="authorpost" id="comment-29411">
+			<p><img alt="" src="./A-Star_files/a37d0d4170a049c8e4e34c1c34ea8ca6" srcset="http://1.gravatar.com/avatar/a37d0d4170a049c8e4e34c1c34ea8ca6?s=64&amp;d=mm&amp;r=g 2x" class="avatar avatar-32 photo" height="32" width="32"><cite>Laurent Luce</cite> wrote:</p>
+			<p>@Markus: Thanks for noticing this bug in the code. I updated the post.</p>
+						<p class="commentmetadata"><a href="http://www.laurentluce.com/posts/solving-mazes-using-python-simple-recursivity-and-a-search/#comment-29411" title="">Link</a> | August 12th, 2012 at 2:01 pm </p>
+		</li>
+					<li class="alt" id="comment-79685">
+			<p><img alt="" src="./A-Star_files/6d93cb0bf43ed448365877d55a21c546" srcset="http://0.gravatar.com/avatar/6d93cb0bf43ed448365877d55a21c546?s=64&amp;d=mm&amp;r=g 2x" class="avatar avatar-32 photo" height="32" width="32"><cite>bruce</cite> wrote:</p>
+			<p>In update_cell, you assign adj.g = cell.g + 10.<br>
+But, this assumes only 4 adjacent cells.  If you change get_adjacent_cells to allow diagonal steps, the diagonal increment would be 14.  The problem is, update_cell doesn’t know which step is taken.  I suggest adding the step to g in get_adjacent_cells.</p>
+<p>Also, why do you add 10 to the test on 21?<br>
+  if c.g &gt; cell.g + 10:</p>
+						<p class="commentmetadata"><a href="http://www.laurentluce.com/posts/solving-mazes-using-python-simple-recursivity-and-a-search/#comment-79685" title="">Link</a> | June 11th, 2013 at 3:44 am </p>
+		</li>
+					<li class="" id="comment-82536">
+			<p><img alt="" src="./A-Star_files/6d93cb0bf43ed448365877d55a21c546" srcset="http://0.gravatar.com/avatar/6d93cb0bf43ed448365877d55a21c546?s=64&amp;d=mm&amp;r=g 2x" class="avatar avatar-32 photo" height="32" width="32"><cite>bruce</cite> wrote:</p>
+			<p>I would like to read a follow up of this same article with the Jump Point Search.</p>
+						<p class="commentmetadata"><a href="http://www.laurentluce.com/posts/solving-mazes-using-python-simple-recursivity-and-a-search/#comment-82536" title="">Link</a> | June 24th, 2013 at 12:44 pm </p>
+		</li>
+					<li class="authorpost" id="comment-101581">
+			<p><img alt="" src="./A-Star_files/a37d0d4170a049c8e4e34c1c34ea8ca6" srcset="http://1.gravatar.com/avatar/a37d0d4170a049c8e4e34c1c34ea8ca6?s=64&amp;d=mm&amp;r=g 2x" class="avatar avatar-32 photo" height="32" width="32"><cite>Laurent Luce</cite> wrote:</p>
+			<p>@bruce: I indicate at the beginning of the post that only horizontal and vertical moves are allowed.  Regarding “if c.g &gt; cell.g + 10”, we are checking if the path going through the current cell is better than what was previously calculated for the adjacent cell. +10 means current path beats adjacent cell path + one move.</p>
+						<p class="commentmetadata"><a href="http://www.laurentluce.com/posts/solving-mazes-using-python-simple-recursivity-and-a-search/#comment-101581" title="">Link</a> | August 31st, 2013 at 12:34 pm </p>
+		</li>
+					<li class="alt" id="comment-119703">
+			<p><img alt="" src="./A-Star_files/a9bfd81b452a74d730239541f57296df" srcset="http://1.gravatar.com/avatar/a9bfd81b452a74d730239541f57296df?s=64&amp;d=mm&amp;r=g 2x" class="avatar avatar-32 photo" height="32" width="32"><cite>nate</cite> wrote:</p>
+			<p>Best Python A* I have found. I would recommend that you publish source in one file. I was able to adopt this into code very quickly. I think it is an example of sane/good OO code oriented toward a Cartesian grid system. Which I imagine would be the starting point for most people exploring A*.</p>
+<p>Would be better if Cell.g were less hardwired (to implement diagonal cost.)</p>
+						<p class="commentmetadata"><a href="http://www.laurentluce.com/posts/solving-mazes-using-python-simple-recursivity-and-a-search/#comment-119703" title="">Link</a> | October 12th, 2013 at 6:42 pm </p>
+		</li>
+					<li class="" id="comment-131968">
+			<p><img alt="" src="./A-Star_files/15e1c8291f65ad41c851411102f2889c" srcset="http://1.gravatar.com/avatar/15e1c8291f65ad41c851411102f2889c?s=64&amp;d=mm&amp;r=g 2x" class="avatar avatar-32 photo" height="32" width="32"><cite>Cristian Viorel Pasat</cite> wrote:</p>
+			<p>Thank you for this very_nice explanation, and for your code :).<br>
+A lil bit more to work on the pep8, but it’s fine by me :D.</p>
+<p>Anyhow, many thanks again.</p>
+						<p class="commentmetadata"><a href="http://www.laurentluce.com/posts/solving-mazes-using-python-simple-recursivity-and-a-search/#comment-131968" title="">Link</a> | October 24th, 2013 at 6:28 am </p>
+		</li>
+					<li class="alt" id="comment-466177">
+			<p><img alt="" src="./A-Star_files/2b69640ac4ddcca876d5b75202696838" srcset="http://2.gravatar.com/avatar/2b69640ac4ddcca876d5b75202696838?s=64&amp;d=mm&amp;r=g 2x" class="avatar avatar-32 photo" height="32" width="32"><cite>Rémi L</cite> wrote:</p>
+			<p>A big thanks to you ! I’m studying in France and i need to study passfinding with a A star algorithm. And i understand what you do with your code ! </p>
+<p>Cordialy, a new fan !</p>
+						<p class="commentmetadata"><a href="http://www.laurentluce.com/posts/solving-mazes-using-python-simple-recursivity-and-a-search/#comment-466177" title="">Link</a> | March 18th, 2015 at 6:33 pm </p>
+		</li>
+		</ol>
+		
+<h3 id="respond">Leave Your Comment</h3>
+		<form action="http://www.laurentluce.com/wp-comments-post.php" method="post" id="commentform">
+					<p><input type="text" name="author" id="author" value="" size="22" tabindex="1">
+			<label for="author"><small>Name (required)</small></label></p>
+			
+			<p><input type="text" name="email" id="email" value="" size="22" tabindex="2">
+			<label for="email"><small>Mail (will not be published) (required)</small></label></p>
+			
+			<p><input type="text" name="url" id="url" value="" size="22" tabindex="3">
+			<label for="url"><small>Website</small></label></p>
+				<!-- to show commenters which tags are allowed, uncomment the line below. -->
+		<!--<p><strong>Allowed (X)HTML:</strong> &lt;a href=&quot;&quot; title=&quot;&quot;&gt; &lt;abbr title=&quot;&quot;&gt; &lt;acronym title=&quot;&quot;&gt; &lt;b&gt; &lt;blockquote cite=&quot;&quot;&gt; &lt;cite&gt; &lt;code&gt; &lt;del datetime=&quot;&quot;&gt; &lt;em&gt; &lt;i&gt; &lt;q cite=&quot;&quot;&gt; &lt;s&gt; &lt;strike&gt; &lt;strong&gt; </p>-->
+		<textarea name="comment" id="comment" cols="50" rows="10" tabindex="4"></textarea>
+		<p><input name="submit" type="submit" id="submit" tabindex="5" value="Post Comment"></p>
+		<input type="hidden" name="comment_post_ID" value="264">
+		<p style="display: none;"><input type="hidden" id="akismet_comment_nonce" name="akismet_comment_nonce" value="bf3a01ff25"></p><p style="display: none;"></p>	<input type="hidden" id="ak_js" name="ak_js" value="1455449677362"></form>
+
+</div><!-- end comment wrap --></div>
+</div>
+</div>
+<div id="ft">
+<script type="text/javascript" src="./A-Star_files/form.js"></script>
+<script type="text/javascript" src="./A-Star_files/shCore.js"></script>
+<script type="text/javascript" src="./A-Star_files/shBrushPython.js"></script>
+<script type="text/javascript" src="./A-Star_files/shBrushBash.js"></script>
+<script type="text/javascript">
+	(function(){
+		var corecss = document.createElement('link');
+		var themecss = document.createElement('link');
+		var corecssurl = "http://www.laurentluce.com/wp-content/plugins/syntaxhighlighter/syntaxhighlighter2/styles/shCore.css?ver=2.1.364";
+		if ( corecss.setAttribute ) {
+				corecss.setAttribute( "rel", "stylesheet" );
+				corecss.setAttribute( "type", "text/css" );
+				corecss.setAttribute( "href", corecssurl );
+		} else {
+				corecss.rel = "stylesheet";
+				corecss.href = corecssurl;
+		}
+		document.getElementsByTagName("head")[0].insertBefore( corecss, document.getElementById("syntaxhighlighteranchor") );
+		var themecssurl = "http://www.laurentluce.com/wp-content/plugins/syntaxhighlighter/syntaxhighlighter2/styles/shThemeEclipse.css?ver=2.1.364";
+		if ( themecss.setAttribute ) {
+				themecss.setAttribute( "rel", "stylesheet" );
+				themecss.setAttribute( "type", "text/css" );
+				themecss.setAttribute( "href", themecssurl );
+		} else {
+				themecss.rel = "stylesheet";
+				themecss.href = themecssurl;
+		}
+		//document.getElementById("syntaxhighlighteranchor").appendChild(themecss);
+		document.getElementsByTagName("head")[0].insertBefore( themecss, document.getElementById("syntaxhighlighteranchor") );
+	})();
+	SyntaxHighlighter.config.clipboardSwf = 'http://www.laurentluce.com/wp-content/plugins/syntaxhighlighter/syntaxhighlighter2/scripts/clipboard.swf';
+	SyntaxHighlighter.config.strings.expandSource = 'show source';
+	SyntaxHighlighter.config.strings.viewSource = 'view source';
+	SyntaxHighlighter.config.strings.copyToClipboard = 'copy to clipboard';
+	SyntaxHighlighter.config.strings.copyToClipboardConfirmation = 'The code is in your clipboard now';
+	SyntaxHighlighter.config.strings.print = 'print';
+	SyntaxHighlighter.config.strings.help = '?';
+	SyntaxHighlighter.config.strings.alert = 'SyntaxHighlighter\n\n';
+	SyntaxHighlighter.config.strings.noBrush = 'Can\'t find brush for: ';
+	SyntaxHighlighter.config.strings.brushNotHtmlScript = 'Brush wasn\'t configured for html-script option: ';
+	SyntaxHighlighter.defaults['pad-line-numbers'] = true;
+	SyntaxHighlighter.all();
+</script>
+<script type="text/javascript" src="./A-Star_files/wp-embed.min.js"></script>
+</div>
+</div><!-- End id=doc -->
+</div><!-- End id=wrapper -->
+<div class="clear">&nbsp;</div>
+<div id="footnote" align="center">
+	Powered by <a href="http://wordpress.org/">Wordpress</a> and <a href="http://www.mysql.com/">MySQL</a>. Theme by <a href="http://code.openark.org/blog/shlomi-noach">Shlomi Noach</a>, <a href="http://openark.org/">openark.org</a>
+</div>
+</div><!-- End align=center -->
+
+
+</body></html>

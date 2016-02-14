@@ -253,7 +253,7 @@ class Animal():
 class Herbivore(Animal):
     
     # on dit que une itération représente 1H, et donc 1J = 24 tours
-    # l'etat est une instance de Normal_herbivore, dont on passe en argument l'animal ayant le comportement concerne
+    # l'etat est une instance de Normal_herbivore, dont on passe en argument l'animal ayant le comportement concerne (le constructeur de chaque etat prends en parametre l'objet animal concerne par le comportement)
     # le comportement a ainsi acces a toutes les methodes et attributs de l'animal, ce qui lui permet de prendre des decisions
     def __init__(self,faim,soif,position,rang,etat):
         super.__init__(24,24,3,1,120,position,rang,Herbivore_normal(self))
