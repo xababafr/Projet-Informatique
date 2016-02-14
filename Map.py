@@ -30,7 +30,7 @@
 
 # ou alors si on se sert des refenrences?? en tout cas, il serait pratique d'avoir un objet case
 
-#Créer une méthode ""suppressioné""
+#Créer une méthode ""suppression""
 #Créer une méthode ""deplacer""
 #Créer une méthode ""voisinage""
 #Créer une méthode distance_max
@@ -39,51 +39,73 @@
 ## truc utile : 
 # a = np.empty((50,50),dtype=object)
 # a[3,2] = Case()
-# voisinnage : a[2:5,1,4] !!!! pratique
+# voisinnage : a[2:5,1:4] !!!! pratique
 
 # UN ARRAY NUMPY SERAIT + PRATIQUE
 
 from tkinter import *
+import numpy as np
 
 class Map:
 
-    def __init__(self, M):
-        self.M = M
-        self.dim = len(M)
+    def __init__(self, MAP):
+        self.MAP = MAP
+        self.dim = len(MAP)
         
     # je suppose pr le moment qu'un n'y a qu'un animal par case
-    def deplacer(self,x,y,x2,y2):
-        self.M[x2][y2][1] = self.M[x][y][1]
-        self.M[x][y][1] = 0
+
         
     def infos(self,x,y):
-        return self.M[x][y] # ou alors pk pas surcharger __getitem__()
+        return self.MAP[x,y] # ou alors pk pas surcharger __getitem__()
         
     # sol = 0
     # herbe = 1
     # eau = 2
-    def afficher(self):
-        fenetre = Tk()
-        for x in range(self.dim):
-            for y in range(self.dim):
-                P = self.infos(x,y)
-                # s'il n'y a pas d'animal , on affiche ce qu'il y a par terre
-                if P[0] == 0:
-                    case = Canvas(fenetre,width=10,height=10,background='brown')
-                elif P[0] == 1:
-                    case = Canvas(fenetre,width=10,height=10,background='green')
-                else:
-                    case = Canvas(fenetre,width=10,height=10,background='blue')
-                if type(P[1]) == Herbivore:
-                    case.create_line(0,0,10,10)
-                elif type(P[1]) == Meute: #predateur en meute
-                    case.create_rectangle(2,2,8,8)
-                else: #preateur solitaire
-                    case.create_text(0,0,text='S')
-                case.pack(padx=10*x,pady=10*y)
-        fenetre.mainloop()
         
+## Méthodes reliées à la Class Animal
+
+def voisinage(self,position,vision):
+    # position est un tuple(x,y)
+    # vision est un int 
+    Px = position[0]
+    Py = position[1]
+    V = np.MAP[Px-vision:Px+vision+1,Py-vision:Py+vision+1]
+    return V
     
+def deplacer(self,position,position2):
+    # position est un tuple (x,y) 
+    # position2 est un tuple (x2,y2)
+    Px = position[0]
+    Py = position[1]
+    Dx = position2[0]
+    Dy = position2[1]    
+    MAP[Dx,Dy][1] = MAP[Px,Py][1]
+    MAP[Px,Py][1] = Rien()
+    
+def suppression(self,position):
+    # position est un tuple (x,y)
+    Px = position[0]
+    Py = position[1]
+    MAP[Px,Py][1] = Rien()
+    
+def distance_max():
+    xmin = 0
+    ymin = 0
+    xmax = len(MAP)
+    ymax = len(MAP)
+    Distmax = sqrt((xmax-xmin)**2+(ymax-ymin)**2)
+    return (Dmax)
+    
+def distance(self,position,position2):
+    # position est un tuple(x,y)
+    # position2 est un tuple (x2,y2)
+    Px = position[0]
+    Py = position[1]
+    Dx = position[0]
+    Dy = position[1]
+    Dist = sqrt((Dx-Px)**2+(Dy-Py)**2)
+    return (Dist)
+
         
 class Animal:
     def __init__(self,n):
