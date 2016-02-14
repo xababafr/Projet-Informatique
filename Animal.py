@@ -5,20 +5,20 @@ from abc import ABCMeta , abstractmethod
 
 class Animal():
     """
-        Classe decrivant un animal, dont le comportement
-        est defini dans plusieurs classes comportement
+        Classe decrivant un animal dont le comportement
+        est defini dans plusieurs autres classes comportement
     """
        
     def __init__(self,faim,soif,vision,vitesse,vie,position,rang,etat):
         """
             la position est un tuple (x,y) ( = position dans la matrice)
             le rang est la position de l'animal dans la liste d'animaux
-            le comportement  un une instance d'une des classes de comportement
+            le comportement est une instance d'une des classes de comportement
             
         """
         
-        # j'ai retiré le parametre self.proie, en fait,  il faudra bien faire un comportement diffenrent
-        # pour herbivore et carnivore.. Effectivement, le lapin recherche sa "proie" dans la premiere case
+        # j'ai retiré le parametre self.proie, en fait,  il faudra bien faire un comportement diffèrent
+        # pour herbivore et carnivore. Effectivement, le lapin recherche sa "proie" dans la premiere case
         # d'une position de la MAP (herbe), tandis que le carnivore la recherche dans la seconde case.
         # un algo différent dera donc a implementer
         
@@ -100,7 +100,7 @@ class Animal():
             y = MAP.dim
         self.position = (x,y)
 
-    # enfin, je met l'etat actuel en lecture seule, on a pas trop envie que ce parametre soit bidouille
+    # enfin, je met l'etat actuel en lecture seule, on a pas trop envie que ce parametre soit bidouillé
     @property 
     def etat(self):
         # suppose la surcharge de __str__ dans chaque etat
@@ -130,8 +130,8 @@ class Animal():
             MAP est l'objet global representant la carte des animaux
             LIVING est la liste des animaux vivants
         """
-        MAP.suppression(self.position)
-        # comme on supprime un element de LIVING, le rang de tous ceux derriere l'animal supprime diminue de 1
+        MAP.suppression(self.position) #Créer une méthode suppression dans MAP
+        # comme on supprime un element de LIVING, le rang de tous ceux derriere l'animal supprimé diminue de 1
         for a in LIVING[self.rang+1:]:
             a.rang -= 1
         del LIVING[self.rang]
@@ -146,16 +146,16 @@ class Animal():
         
     def deplacer(self,position2):
         #position est un tuple(x2,y2)
-        MAP.deplacer(self.position,position2)
+        MAP.deplacer(self.position,position2) #Créer une méthode deplacer dans MAP
         self.position = position2
         
     def detecter_eau(self):
         """
-            fonction qui renvoi False s'il n'y a pas d'eau dans le voisinnage, et 
-            qui renvoi la position (x,y) de la case d'eau la + proche si elle existe
+            fonction qui renvoi False s'il n'y a pas d'eau dans le voisinage, et 
+            qui renvoi la position (x,y) de la case d'eau la + proche si elle                    existe
         """
         # V est un tableau n x n, ou n est la vision de l'animal 
-        V = MAP.voisinnage(self.position,self.vision)
+        V = MAP.voisinage(self.position,self.vision)
         taille = len(V)
         # l'eau la plus proche de l'animal trouvee actuellement
         eau_trouvee = False
@@ -174,13 +174,13 @@ class Animal():
 
     def detecter_herbivore(self):
         """
-            fonction qui renvoi False s'il n'y a pas d'autres herbivoores dans le voisinnage, et 
+            fonction qui renvoi False s'il n'y a pas d'autres herbivores dans le voisinage, et 
             qui renvoi la position (x,y) de la case de l'herbivore le + proche si il est visible
         """
         # V est un tableau n x n, ou n est la vision de l'animal 
-        V = MAP.voisinnage(self.position,self.vision)
+        V = MAP.voisinage(self.position,self.vision)
         taille = len(V)
-        # l'eau la plus proche de l'animal trouvee actuellement
+        # l'herbivore le plus proche de l'animal trouve actuellement
         herbivore_trouve = False
         distance = MAP.distance_max()
         for i in range(taille):
@@ -202,20 +202,20 @@ class Animal():
             qui renvoi la position (x,y) de la case du predateur le + proche si il est visible
         """
         # V est un tableau n x n, ou n est la vision de l'animal 
-        V = MAP.voisinnage(self.position,self.vision)
+        V = MAP.voisinage(self.position,self.vision)
         taille = len(V)
-        # l'eau la plus proche de l'animal trouvee actuellement
+        # Prédateur le plus proche de l'animal trouvee actuellement
         predateur_trouve = False
         distance = MAP.distance_max()
         for i in range(taille):
             for j in range(taille):
-                ## ici, je suppose que dans la deuxieme case de chaque positon, il y a un object possedant une
+                ## ici, je suppose que dans la deuxieme case de chaque position, il y a un object possedant une
                 ## methode is_predateur revoyant un booleen : a moi de definir ça pour chaque animal, et
                 ## de aussi definir une classe Rien qui aura cette méthode, pour que l'on puisse mettre une
                 ## instance de cette classe dans les cases où il n'y a pas d'animaux
                 # si c'est un predateur
                 if (not (V[i,j][1]).is_herbivore()):
-                    # si celle-ci est plus proche de l'animal que l'ancienne
+                    # si cette distance est plus petite que l'ancienne
                     distance_locale = MAP.distance(self.position,(i,j))
                     if (distance_locale < distance):
                         predateur_trouve = (i,j)
@@ -225,13 +225,25 @@ class Animal():
 
     def deplacements_possibles(self):
         """
-            checke toutes les cases autour de l'animal, et renvoi la position de celles qui ne sont pas de l'eau, 
-            donc celles sur lesquelles il peux se deplacer
+            check toutes les cases autour de l'animal, et renvoi la position de celles qui ne sont pas de l'eau, 
+            donc celles sur lesquelles il peut se deplacer
             Pour une premiere approximation, on dira que l'on peux meme marcher sur l'eau( juste des petites mares)
         """
-
-        # a ecrire
-
+        # V est un tableau n x n, où n est la vision de l'animal
+        V=MAP.voisinage(self.position,self.vision)
+        # Les déplacements possibles seront inscrits dans une liste deplacement_possible
+        deplacement_possible = []
+        taille = len(V)
+        position_eau = []
+        # On check toutes les cases de V
+        for i in range (taille):
+            for j in range (taille):
+                if V[0] == 1:
+                    position_eau = position_eau+[i,j]
+                else :
+                    deplacement_possible = deplacement_possible + [i,j]
+        return deplacement_possible
+            
         pass
 
 
@@ -240,9 +252,9 @@ class Animal():
 
 class Herbivore(Animal):
     
-    # on dit que une intération représente 1H, et donc 1J = 24 tours
-    # l'etat es une instance de Normal_herbivore, dont on passe en argument l'animal ayant le comportement concerne
-    # le comportement a ainsi acces a toutes les methodes et attribut de l'animal, ce qui lui permet de prendre des descisions
+    # on dit que une itération représente 1H, et donc 1J = 24 tours
+    # l'etat est une instance de Normal_herbivore, dont on passe en argument l'animal ayant le comportement concerne
+    # le comportement a ainsi acces a toutes les methodes et attributs de l'animal, ce qui lui permet de prendre des decisions
     def __init__(self,faim,soif,position,rang,etat):
         super.__init__(24,24,3,1,120,position,rang,Herbivore_normal(self))
         
@@ -276,7 +288,7 @@ class Solitaire(Animal):
     def __init__(self,faim,soif,position,rang,etat):
         super.__init__(24,24,6,3,72,position,rang,Solitaire_normal(self))
         
-    # est une predateur
+    # est un predateur
     def is_herbivore(self):
         return False
         
@@ -306,12 +318,12 @@ class Solitaire(Animal):
 
 
 class Meute(Animal):
-    # le predateur en leute se deplace vite et a une vision moyenne, mais a une durée de vie plus faible que les herbivores
+    # le predateur en Meute se deplace vite et a une vision moyenne, mais a une durée de vie plus faible que les herbivores
     # il ne faut pas leur donner une vue trop forte, sinon, il vont raser des troupeaux d'herbivores tout le temps
     def __init__(self,faim,soif,position,rang,etat):
         super.__init__(24,24,4,2,96,position,rang,Meute_normal(self))
         
-    # est une predateur
+    # est un predateur
     def is_herbivore(self):
         return False
         
@@ -322,7 +334,7 @@ class Meute(Animal):
     def manger(self):
         self.faim += 24
 
-    # pour augmenter leur mobilite, on va aussi dire qu'il n'ont besoin de boire que deux fois dans la journee
+    # pour augmenter leur mobilite, on va aussi dire qu'ils n'ont besoin de boire que deux fois dans la journee
 
     def boire(self):
         self.soif += 12

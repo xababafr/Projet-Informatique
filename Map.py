@@ -30,6 +30,12 @@
 
 # ou alors si on se sert des refenrences?? en tout cas, il serait pratique d'avoir un objet case
 
+#Créer une méthode ""suppressioné""
+#Créer une méthode ""deplacer""
+#Créer une méthode ""voisinage""
+#Créer une méthode distance_max
+#Créer une méthode ""distance""
+
 ## truc utile : 
 # a = np.empty((50,50),dtype=object)
 # a[3,2] = Case()
