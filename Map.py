@@ -39,7 +39,7 @@
 ## truc utile : 
 # a = np.empty((50,50),dtype=object)
 # a[3,2] = Case()
-# voisinnage : a[2:5,1,4] !!!! pratique
+# voisinnage : a[2:5,1:4] !!!! pratique
 
 # UN ARRAY NUMPY SERAIT + PRATIQUE
 
