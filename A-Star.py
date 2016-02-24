@@ -1,6 +1,9 @@
 import heapq
 import numpy as np
 
+## le pathfinding ne marche pas deux fois d'affilees :
+# il faut creer un nouvel objet a chaque fois
+
 mappy = [
 	[[0,None],[0,None],[0,None],[0,None],[0,None],[1,None]],
 	[[1,None],[1,None],[0,None],[0,None],[0,None],[1,None]],
@@ -28,14 +31,7 @@ class Cell():
 		self.G = 0
 		self.H = 0
 		self.F = 0
-		
-	## en copiant/collant directement le code du mec
-	## son code marche pas non plus en 3.*
-	## mais en 2.7, si, donc visiblement, python ne sait plus comparer deux tuples
-	## par rapport aleur premier element en 3.*, donc il faut lui expliquer avec __gt__
-	## ici, c'est pourtant ce que j'ai fait, donc il doit aussi y avoir unprobleme avec
-	## ma traduction du probleme a notre configuration
-	## mais le sien marche apres ma modification!! (pas tt a fait pareil mais meme veracite il me semble)
+
 
 	def __gt__(self,cell):
 		return self.F > cell.F
