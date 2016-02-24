@@ -1,4 +1,14 @@
 import heapq
+import numpy as np
+
+mappy = [
+	[[0,None],[0,None],[0,None],[0,None],[0,None],[1,None]],
+	[[1,None],[1,None],[0,None],[0,None],[0,None],[1,None]],
+	[[0,None],[0,None],[0,None],[1,None],[0,None],[0,None]],
+	[[0,None],[1,None],[1,None],[0,None],[0,None],[1,None]],
+	[[0,None],[1,None],[0,None],[0,None],[1,None],[0,None]],
+	[[0,None],[1,None],[0,None],[0,None],[0,None],[0,None]]
+]
 
 mappy2 = [
 	[[0,None],[0,None],[0,None],[0,None],[1,None],[0,None]],
@@ -46,13 +56,18 @@ class AStar():
 
 		# ontravaillera toujours avec une grille carree
 		self.dim = n
-		self.start = Cell(start[0],start[1],False)
-		self.end = Cell(end[0],end[1],False)
+		
+		##NON, VOIR EN DESSOUS
+		#self.start = Cell(start[0],start[1],False)
+		#self.end = Cell(end[0],end[1],False)
 
 		for x in range(n):
 			for y in range(n):
 				value = (MAP[x,y][0] == 1)
 				self.cells.append(Cell(x,y,value))
+				
+		self.start = self.get_cell(start[0], start[1])
+		self.end = self.get_cell(end[0], end[1])
 
 	def get_cell(self,x,y):
 		return self.cells[x * self.dim + y]
@@ -75,9 +90,11 @@ class AStar():
 	def get_path(self):
 		cell = self.end
 		path = []
-		while cell.parent != self.start or cell.parent != None or cell != None:
-			path.append((cell.x,cell.y))
+		path.append((cell.x,cell.y))
+		while cell.parent is not self.start:
 			cell = cell.parent
+			path.append((cell.x,cell.y))
+		return path
 
 	def set_voisin(self, parent, voisin):
 		# on appelle cette fonction pour calculer les g, h et f d'une cellule, en connaissant sa cellule parente
@@ -87,37 +104,29 @@ class AStar():
 		voisin.parent = parent
 
 
-	def find_patch(self):
+	def find_path(self):
 		heapq.heappush(self.L_ouverte, (self.start.F, self.start))
 		while len(self.L_ouverte):
 			F,cell = heapq.heappop(self.L_ouverte)
-			print('Cell : '+str((cell.x,cell.y))+', F : '+str(F))
 			self.L_fermee.add(cell) #on l'ajoute si elle est pas deja dedans (d'ou l'utilisation d'un set())
 
 			#si on est arrive au bout
 			if cell is self.end:
-				print('OK!')
-				return True
+				return self.get_path()
 
 			voisins = self.get_voisins(cell)
 			for voisin in voisins:
-				t = '    Voisin : '+str((voisin.x,voisin.y))+'   '
 				if (not voisin.obstacle) and not(voisin in self.L_fermee):
-					t += 'cond1   '
 					if (voisin.F, voisin) in self.L_ouverte:
-						t += 'cond2   '
 						# si la cellule voisine est egalement dans la liste ouverte
 						# on regarde si le chemin est plus interessant en passant par la cellule actuelle
 						if voisin.G > cell.G + 10:
-							t += 'cond 3   '
 							self.set_voisin(cell,voisin)
 					else: #cas classique
-						t += 'cond4   '
 						self.set_voisin(cell,voisin)
 						
 						## le probleme est peut etre avec cettte implementation des files prioritaires
 						
 						heapq.heappush(self.L_ouverte, (voisin.F, voisin))
-				print(t)
 		return False
 
