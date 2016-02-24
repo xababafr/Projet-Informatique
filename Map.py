@@ -101,8 +101,8 @@ def distance(self,position,position2):
     # position2 est un tuple (x2,y2)
     Px = position[0]
     Py = position[1]
-    Dx = position[0]
-    Dy = position[1]
+    Dx = position2[0]
+    Dy = position2[1]
     Dist = sqrt((Dx-Px)**2+(Dy-Py)**2)
     return (Dist)
 

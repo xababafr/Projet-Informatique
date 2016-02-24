@@ -263,6 +263,9 @@ class Herbivore(Animal):
     # à surcharger
     def is_herbivore(self):
         return True
+    
+    def is_predateur(self):
+        reurn False
         
     
     # Pour faim et soif, je met une limite assez haute, car on ne veux pas qu'ils bougent trop
@@ -294,6 +297,8 @@ class Solitaire(Animal):
     def is_herbivore(self):
         return False
         
+    def is_predateur(self):
+        return True
     
     # Quand un prédateur se nourrit, on estime qu'il a assez mangé pour toute la journée : la faim repasse a 24
     # Comme on a défini un setter sur la faim, on peut simplement le nourrir de 24
@@ -329,6 +334,9 @@ class Meute(Animal):
     def is_herbivore(self):
         return False
         
+    def is_predateur(self):
+        return True
+        
     
     # Quand un prédateur se nourrit, on estime qu'il a assez mangé pour toute la journée : la faim repasse a 24
     # comme on a défini un setter sur la faim, on peut simplement le nourrir de 24
@@ -353,6 +361,17 @@ class Meute(Animal):
     def a_soif(self):
         return (self.soif < 18)
 
+
+class Rien():
+    
+    def is_herbivore(self):
+        return False
+    
+    def is_predateur(self):
+        return False
+        
+    
+    
         
 
 #lapin = Animal(1,2,3,4,5,6,7,8)
