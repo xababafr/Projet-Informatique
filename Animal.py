@@ -152,7 +152,7 @@ class Animal():
     def detecter_eau(self):
         """
             Fonction qui renvoie False s'il n'y a pas d'eau dans le voisinage, et 
-            qui renvoie la position (x,y) de la case d'eau la + proche si elle                    existe
+            qui renvoie la position (x,y) de la case d'eau la + proche si elle existe
         """
         # V est un tableau n x n, ou n est la vision de l'animal 
         V = MAP.voisinage(self.position,self.vision)
@@ -247,16 +247,11 @@ class Animal():
 
 
 class Herbivore(Animal):
-    
-<<<<<<< HEAD
+
     # on dit que une itération représente 1H, et donc 1J = 24 tours
     # l'etat est une instance de Normal_herbivore, dont on passe en argument l'animal ayant le comportement concerne (le constructeur de chaque etat prends en parametre l'objet animal concerne par le comportement)
     # le comportement a ainsi acces a toutes les methodes et attributs de l'animal, ce qui lui permet de prendre des decisions
-=======
-    # On dit qu'une itération représente 1H, et donc 1J = 24 tours
-    # L'état est une instance de Normal_herbivore, dont on passe en argument l'animal ayant le comportement concerné
-    # Le comportement a ainsi accés a toutes les méthodes et attributs de l'animal, ce qui lui permet de prendre des decisions
->>>>>>> origin/master
+
     def __init__(self,faim,soif,position,rang,etat):
         super.__init__(24,24,3,1,120,position,rang,Herbivore_normal(self))
         

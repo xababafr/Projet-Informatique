@@ -106,7 +106,3 @@ def distance(self,position,position2):
     Dist = sqrt((Dx-Px)**2+(Dy-Py)**2)
     return (Dist)
 
-        
-class Animal:
-    def __init__(self,n):
-        self.n = n
