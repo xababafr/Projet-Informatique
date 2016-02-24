@@ -1,5 +1,6 @@
-import numpy as np
+#import numpy as np
 from abc import ABCMeta , abstractmethod
+#from Map import Map
 
 # on mettra ces deux imports dans le futur fichier "final"
 
@@ -22,14 +23,16 @@ class Animal():
         # d'une position de la MAP (herbe), tandis que le carnivore la recherche dans la seconde case.
         # un algo différent dera donc a implementer
         
-        self.faim = faim
-        self.soif = soif
+        #MAP = MAP
+        #self.LIVING = LIVING
+        self.__faim = faim
+        self.__soif = soif
         self.vision = vision
         self.vitesse = vitesse
         self.vie = vie
-        self.position = position
+        self.__position = position
         self.rang = rang
-        self.etat = etat
+        self.__etat = etat
         
     # à surcharger
     @abstractmethod
@@ -55,27 +58,27 @@ class Animal():
     # on fais donc le getter et le setter
     @property
     def faim(self):
-        return self.faim
+        return self.__faim
 
     @faim.setter
     def faim(self,f):
-        self.faim += f
-        if self.faim > 24:
-            self.faim = 24
-        if self.faim < 0:
-            self.faim = 0
+        self.__faim = f
+        if self.__faim > 24:
+            self.__faim = 24
+        if self.__faim < 0:
+            self.__faim = 0
 
     @property
     def soif(self):
-        return self.soif
+        return self.__soif
 
     @soif.setter
     def soif(self,s):
-        self.soif += s
-        if self.soif > 24:
-            self.soif = 24
-        if self.soif < 0:
-            self.soif = 0
+        self.__soif = s
+        if self.__soif > 24:
+            self.__soif = 24
+        if self.__soif < 0:
+            self.__soif = 0
 
     # De même, on vérifie que la position ne dépasse jamais les limites de la map
     # Deux solutions : les bords de la map sont des murs, ou
@@ -84,7 +87,7 @@ class Animal():
 
     @property
     def position(self):
-        return self.position
+        return self.__position
 
     ## On suppose l'exisence d'un attribut dim dans MAP, qui est la dimension de l'array numpy
     @position.setter
@@ -93,18 +96,18 @@ class Animal():
         if x < 0:
             x = 0
         if x > MAP.dim:
-            x = MAP.dim
+            x = MAP.dim-1
         if y < 0:
             y = 0
         if y > MAP.dim:
-            y = MAP.dim
-        self.position = (x,y)
+            y = MAP.dim-1
+        self.__position = (x,y)
 
     # Enfin, je met l'état actuel en lecture seule, on a pas trop envie que ce paramètre soit bidouillé
     @property 
     def etat(self):
         # Suppose la surcharge de __str__ dans chaque état
-        return(str(self.etat))
+        return(str(self.__etat))
 
     def __str__(self):
         texte = 'faim : {} \nsoif : {} \nvision : {} \nvitesse : {} \nvie : {} \nposition : {}\nrang : {}\netat : {} \n'.format(self.faim,self.soif,self.vision,self.vitesse,self.vie,self.position,self.rang,self.etat)
@@ -260,7 +263,7 @@ class Herbivore(Animal):
         return True
     
     def is_predateur(self):
-        reurn False
+        return False
         
     
     # Pour faim et soif, je met une limite assez haute, car on ne veux pas qu'ils bougent trop

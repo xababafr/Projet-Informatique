@@ -4,24 +4,6 @@ import numpy as np
 ## le pathfinding ne marche pas deux fois d'affilees :
 # il faut creer un nouvel objet a chaque fois
 
-mappy = [
-	[[0,None],[0,None],[0,None],[0,None],[0,None],[1,None]],
-	[[1,None],[1,None],[0,None],[0,None],[0,None],[1,None]],
-	[[0,None],[0,None],[0,None],[1,None],[0,None],[0,None]],
-	[[0,None],[1,None],[1,None],[0,None],[0,None],[1,None]],
-	[[0,None],[1,None],[0,None],[0,None],[1,None],[0,None]],
-	[[0,None],[1,None],[0,None],[0,None],[0,None],[0,None]]
-]
-
-mappy2 = [
-	[[0,None],[0,None],[0,None],[0,None],[1,None],[0,None]],
-	[[0,None],[0,None],[0,None],[0,None],[1,None],[0,None]],
-	[[0,None],[0,None],[0,None],[0,None],[1,None],[0,None]],
-	[[0,None],[0,None],[0,None],[0,None],[0,None],[0,None]],
-	[[0,None],[0,None],[0,None],[0,None],[1,None],[0,None]],
-	[[0,None],[0,None],[1,None],[1,None],[1,None],[0,None]]
-]
-
 class Cell():
 	def __init__(self, x, y, obstacle):
 		self.x = x

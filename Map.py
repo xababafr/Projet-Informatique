@@ -30,24 +30,6 @@
 import numpy as np
 from math import sqrt
 
-mappy = [
-    [[0,None],[0,None],[0,None],[0,None],[0,None],[1,None]],
-    [[1,None],[1,None],[0,None],[0,None],[0,None],[1,None]],
-    [[0,None],[0,None],[0,None],[1,None],[0,None],[0,None]],
-    [[0,None],[1,None],[1,None],[0,None],[0,None],[1,None]],
-    [[0,None],[1,None],[0,None],[0,None],[1,None],[0,None]],
-    [[0,None],[1,None],[0,None],[0,None],[0,None],[0,None]]
-]
-
-mappy2 = [
-    [[0,None],[0,None],[0,None],[0,None],[1,None],[0,None]],
-    [[0,None],[0,None],[0,None],[0,None],[1,None],[0,None]],
-    [[0,None],[0,None],[0,None],[0,None],[1,None],[0,None]],
-    [[0,None],[0,None],[0,None],[0,None],[0,None],[0,None]],
-    [[0,None],[0,None],[0,None],[0,None],[1,None],[0,None]],
-    [[0,None],[0,None],[1,None],[1,None],[1,None],[0,None]]
-]
-
 class Map:
 
     def __init__(self, MAP):
