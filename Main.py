@@ -1,4 +1,8 @@
+import sys
+sys.path.append(os.getcwd())
 import numpy as np
+from Animal import *
+from Map import Map
 
 mappy = [
     [[0,None],[0,None],[0,None],[0,None],[0,None],[1,None]],
@@ -25,11 +29,8 @@ class Etat:
     def action(self):
         print(self.n)
         
-from Map import Map
 
 ## VARIABLES GLOBALES
 
 global MAP
 MAP = Map(np.array(mappy))
-
-from Animal import *
