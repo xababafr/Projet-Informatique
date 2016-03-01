@@ -30,29 +30,42 @@ class Solitaire_normal(Etat):
 		#elif...
 		else:
 			# sinon, on fais le comportement classique de cet etat
-	        V = MAP.voisinnage(self.animal.position,self.animal.vision)
-	        n = len(V)
-	        x,y,v = self.animal.position[0],self.animal.position[1],self.animal.vision
+			V = ecosysteme.MAP.voisinnage(self.animal.position,self.animal.vision)
+			n = len(V)
+			x,y,v = self.animal.position[0],self.animal.position[1],self.animal.vision
 			numero = np.random.randint(0,n*n)
 			c = 0
 			destination = (0,0)
-	        for i in range(n):
-	        	for j in range(n):
-	        			if c == numero:
-	        				# la position a laquelle on se trouve est (x+i-v,y+j-v)
-	        				# en effet, le tableau V part des coordonnees (0,0), alors qu'en fait on est autour du point (x,y)
-	    					# on commence donc par ajouter x et y a i et j
-	        				# mais le point (x,y) n'est pas en haut a gauche du tableau, mais en plein milieu, donc decale
-	        				# a a position (+v,+v), d'ou le fait que l'on retranche v a chaque coordonnee
-	        				destination = (x+i-v,y+j-v)
+			for i in range(n):
+				for j in range(n):
+					if c == numero:
+						# la position a laquelle on se trouve est (x+i-v,y+j-v)
+						# en effet, le tableau V part des coordonnees (0,0), alors qu'en fait on est autour du point (x,y)
+						# on commence donc par ajouter x et y a i et j
+						# mais le point (x,y) n'est pas en haut a gauche du tableau, mais en plein milieu, donc decale
+						# a a position (+v,+v), d'ou le fait que l'on retranche v a chaque coordonnee
+						destination = (x+i-v,y+j-v)
 
-	        				# on peux alors sortir de la double boucle, on a trouve la case que l'on voulait
-	        				break;break;
-	        			c += 1
+						# on peux alors sortir de la double boucle, on a trouve la case que l'on voulait
+						break;break;
+					c += 1
 
-	        	MAP.deplacer_animal((x,y),destination)
-
-
+			ecosysteme.MAP.deplacer_animal((x,y),destination)
 
 
 
+
+class TypeAnimal_etatActuel:
+	def action():
+		# 1er bloc
+		
+		if ( conditions_pour_changer_d-etat ):
+			self.animal.changer_etat( nouvel_etat )
+		if (une_autre_cond ):
+			self.animal.changer_etat( un_autre_etat )
+		#etc...
+		
+		
+		# 2eme bloc
+		# si on a pas changé d'etat, on fais les actions relatives a celui-ci
+		

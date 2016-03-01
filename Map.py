@@ -89,3 +89,61 @@ class Map:
         Dist = sqrt((Dx-Px)**2+(Dy-Py)**2)
         return (Dist)
 
+
+if __name__ == "__main__":
+    
+    #on cree un animal inutile, juste pour le test
+    class Animal_vide:
+        def __init__(self):
+            pass
+            
+    class Rien():
+        def __init__(self):
+            pass
+            
+    animal = Animal_vide()
+    
+    mappy = np.array([
+        [[0,Rien()],[0,Rien()],[0,Rien()],[0,Rien()],[0,Rien()],[1,Rien()]],
+        [[1,Rien()],[1,Rien()],[0,Rien()],[0,Rien()],[0,Rien()],[1,Rien()]],
+        [[0,Rien()],[0,Rien()],[0,Rien()],[1,Rien()],[0,Rien()],[0,Rien()]], # animal en (3,3)
+        [[0,Rien()],[1,Rien()],[1,Rien()],[0,animal],[0,Rien()],[1,Rien()]],
+        [[0,Rien()],[1,Rien()],[0,Rien()],[0,Rien()],[1,Rien()],[0,Rien()]],
+        [[0,Rien()],[1,Rien()],[0,Rien()],[0,Rien()],[0,Rien()],[0,Rien()]]
+    ])
+    
+    m = Map(mappy)
+    
+    V = m.voisinnage((3,3),2)
+    
+    assert V.tolist() == m.MAP[1:6,1:6].tolist() , \
+    "Erreur : voisinnage"
+    print("Ok : voisinnage")
+    
+    m.deplacer((3,3),(2,2))
+    
+    assert (isinstance(m.MAP[3,3][1],Rien) and m.MAP[2,2][1] == animal), \
+    "Erreur : deplacer"
+    print("Ok : deplacer")
+    
+    m.suppression((2,2))
+    
+    assert (isinstance(m.MAP[2,2][1],Rien)), \
+    "Erreur : suppression"
+    print("Ok : suppression")
+    
+    assert (m.distance((0,0),(1,1)) == sqrt(2)), \
+    "Erreur : distance"
+    print("Ok : distance")
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    

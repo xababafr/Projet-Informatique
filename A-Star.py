@@ -108,3 +108,35 @@ class AStar():
 						heapq.heappush(self.L_ouverte, (voisin.F, voisin))
 		return False
 
+if __name__ == "__main__":
+		
+	class Rien():
+		def __init__(self):
+			pass
+		
+	animal = Animal_vide()
+
+	mappy = np.array([
+		[[0,Rien()],[0,Rien()],[0,Rien()],[0,Rien()],[0,Rien()],[1,Rien()]],
+		[[1,Rien()],[1,Rien()],[0,Rien()],[0,Rien()],[0,Rien()],[1,Rien()]],
+		[[0,Rien()],[0,Rien()],[0,Rien()],[1,Rien()],[0,Rien()],[0,Rien()]], 
+		[[0,Rien()],[1,Rien()],[1,Rien()],[0,Rien()],[0,Rien()],[1,Rien()]],
+		[[0,Rien()],[1,Rien()],[0,Rien()],[0,Rien()],[1,Rien()],[0,Rien()]],
+		[[0,Rien()],[1,Rien()],[0,Rien()],[0,Rien()],[0,Rien()],[0,Rien()]]
+	])
+	
+	start,end = (0,0) , (5,5)
+	
+	pathfinder = AStar(mappy,start,end)
+	path = pathfinder.find_path()
+	
+	def check_path(path):
+		for t in path:
+			if (mappy[t[0],t[1]][0] == 1):
+				return False
+		if (path[0] != end):
+			return False
+		return True
+		
+	assert check_path(path), "Erreur : pathfinder"
+	print("Ok : pathfinder")

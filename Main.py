@@ -2,7 +2,7 @@ import sys
 sys.path.append(os.getcwd())
 import numpy as np
 from Animal import *
-from Map import Map
+from Map import *
 
 mappy = [
     [[0,None],[0,None],[0,None],[0,None],[0,None],[1,None]],
@@ -28,6 +28,12 @@ class Etat:
         
     def action(self):
         print(self.n)
+        
+
+class Ecosysteme:
+    def __init__(self,MAP,LIVING):
+        self.MAP = MAP
+        self.LIVING = LIVING
         
 
 ## VARIABLES GLOBALES

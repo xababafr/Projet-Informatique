@@ -20,10 +20,10 @@ class Animal():
         
         # J'ai retiré le paramètre self.proie. En fait, il faudra bien faire un comportement diffèrent
         # pour herbivore et carnivore. Effectivement, le lapin recherche sa "proie" dans la premiere case
-        # d'une position de la MAP (herbe), tandis que le carnivore la recherche dans la seconde case.
+        # d'une position de la ecosysteme.MAP (herbe), tandis que le carnivore la recherche dans la seconde case.
         # un algo différent dera donc a implementer
         
-        #MAP = MAP
+        #ecosysteme.MAP = ecosysteme.MAP
         #self.LIVING = LIVING
         self.__faim = faim
         self.__soif = soif
@@ -89,18 +89,18 @@ class Animal():
     def position(self):
         return self.__position
 
-    ## On suppose l'exisence d'un attribut dim dans MAP, qui est la dimension de l'array numpy
+    ## On suppose l'exisence d'un attribut dim dans ecosysteme.MAP, qui est la dimension de l'array numpy
     @position.setter
     def position(self,p):
         x,y = p[0],p[1]
         if x < 0:
             x = 0
-        if x > MAP.dim:
-            x = MAP.dim-1
+        if x > ecosysteme.MAP.dim:
+            x = ecosysteme.MAP.dim-1
         if y < 0:
             y = 0
-        if y > MAP.dim:
-            y = MAP.dim-1
+        if y > ecosysteme.MAP.dim:
+            y = ecosysteme.MAP.dim-1
         self.__position = (x,y)
 
     # Enfin, je met l'état actuel en lecture seule, on a pas trop envie que ce paramètre soit bidouillé
@@ -130,10 +130,10 @@ class Animal():
             
     def mourir(self):
         """
-            MAP est l'objet global représentant la carte des animaux
+            ecosysteme.MAP est l'objet global représentant la carte des animaux
             LIVING est la liste des animaux vivants
         """
-        MAP.suppression(self.position) # Créer une méthode suppression dans MAP
+        ecosysteme.MAP.suppression(self.position) # Créer une méthode suppression dans ecosysteme.MAP
         # Comme on supprime un élèment de LIVING, le rang de tous ceux derriere celui de l'animal supprimé diminue de 1
         for a in LIVING[self.rang+1:]:
             a.rang -= 1
@@ -149,7 +149,7 @@ class Animal():
         
     def deplacer(self,position2):
         # La position est un tuple(x2,y2)
-        MAP.deplacer(self.position,position2) # Créer une méthode deplacer dans MAP
+        ecosysteme.MAP.deplacer(self.position,position2) # Créer une méthode deplacer dans ecosysteme.MAP
         self.position = position2
         
     def detecter_eau(self):
@@ -158,17 +158,17 @@ class Animal():
             qui renvoie la position (x,y) de la case d'eau la + proche si elle existe
         """
         # V est un tableau n x n, ou n est la vision de l'animal 
-        V = MAP.voisinage(self.position,self.vision)
+        V = ecosysteme.MAP.voisinage(self.position,self.vision)
         taille = len(V)
         # L'eau la plus proche de l'animal trouvée actuellement
         eau_trouvee = False
-        distance = MAP.distance_max()
+        distance = ecosysteme.MAP.distance_max()
         for i in range(taille):
             for j in range(taille):
                 # Si c'est de l'eau (on manipule un array numpy)
                 if V[i,j][0] == 1:
                     # Si celle-ci est plus proche de l'animal que l'ancienne eau
-                    distance_locale = MAP.distance(self.position,(i,j))
+                    distance_locale = ecosysteme.MAP.distance(self.position,(i,j))
                     if (distance_locale < distance):
                         eau_trouvee = (i,j)
                         distance = distance_locale
@@ -181,18 +181,18 @@ class Animal():
             qui renvoi la position (x,y) de la case de l'herbivore le + proche si il est visible
         """
         # V est un tableau n x n, ou n est la vision de l'animal 
-        V = MAP.voisinage(self.position,self.vision)
+        V = ecosysteme.MAP.voisinage(self.position,self.vision)
         taille = len(V)
         # L'herbivore le plus proche de l'animal trouvé actuellement
         herbivore_trouve = False
-        distance = MAP.distance_max()
+        distance = ecosysteme.MAP.distance_max()
         for i in range(taille):
             for j in range(taille):
                 ## De même, je suppose l'existence d'une méthode is_herbivore
                 # Si c'est un prédateur
                 if (V[i,j][1]).is_herbivore():
                     # Si celui-ci est plus proche de l'animal que l'ancien herbivore
-                    distance_locale = MAP.distance(self.position,(i,j))
+                    distance_locale = ecosysteme.MAP.distance(self.position,(i,j))
                     if (distance_locale < distance):
                         herbivore_trouve = (i,j)
                         distance = distance_locale
@@ -205,11 +205,11 @@ class Animal():
             qui renvoi la position (x,y) de la case du prédateur le + proche si il est visible
         """
         # V est un tableau n x n, ou n est la vision de l'animal 
-        V = MAP.voisinage(self.position,self.vision)
+        V = ecosysteme.MAP.voisinage(self.position,self.vision)
         taille = len(V)
         # Prédateur le plus proche de l'animal trouvé actuellement
         predateur_trouve = False
-        distance = MAP.distance_max()
+        distance = ecosysteme.MAP.distance_max()
         for i in range(taille):
             for j in range(taille):
                 ## Ici, je suppose que dans la deuxième case de chaque position, il y a un objet possédant une
@@ -219,7 +219,7 @@ class Animal():
                 # Si c'est un prédateur
                 if (not (V[i,j][1]).is_herbivore()):
                     # Si cette distance est plus petite que l'ancienne
-                    distance_locale = MAP.distance(self.position,(i,j))
+                    distance_locale = ecosysteme.MAP.distance(self.position,(i,j))
                     if (distance_locale < distance):
                         predateur_trouve = (i,j)
                         distance = distance_locale
@@ -233,7 +233,7 @@ class Animal():
             Pour une première approximation, on dira que l'on peux même marcher sur l'eau (juste des petites mares)
         """
         # V est un tableau n x n, où n est la vision de l'animal
-        V=MAP.voisinage(self.position,self.vision)
+        V=ecosysteme.MAP.voisinage(self.position,self.vision)
         # Les déplacements possibles seront inscrits dans une liste déplacement_possibles
         deplacement_possible = []
         taille = len(V)
