@@ -1,5 +1,6 @@
 import numpy as np
 from abc import ABCMeta , abstractmethod
+from random import randint
 
 # classe abstraite
 class Etat(metaclass=ABCMeta):
@@ -69,3 +70,120 @@ class TypeAnimal_etatActuel:
 		# 2eme bloc
 		# si on a pas changé d'etat, on fais les actions relatives a celui-ci
 		
+class Solitaire_normal(Etat):
+	def action(self):
+		if self.animal.a_faim == True:
+			self.animal.changer_etat(Solitaire_faim)
+		elif self.animal.a_soif == True:
+			self.animal.changer_etat(Solitaire_soif)
+		elif:
+	# Se deplacer aléatoirement
+			case_disponible = self.animal.deplacements_possibles
+	# case_disponible est une liste des cases disponibles
+			deplacement_proximite = [(position[0]+1,position[1]),(position[0]-1,position[1]),(position[0],position[1]+1),(position[0],position[1]-1),(position[0]+1,position[1]+1), (position[0]+1,position[1]-1),(position[0]-1,position[1]-1), (position[0]-1,position[1]+1)]
+	# On supprime tout les cases de proximité indisponible
+			for k in range len(deplacement_proximité):
+				if deplacement_proximite[i] is not in case_disponible:
+					deplacement_proximite.remove(deplacement_proximite[i])
+			position = self.animal.position
+	# position est un tuple (i,j)
+	# Solitaire se déplace aléatoirement sur une distance de "vitesse" case
+			for k in range self.animal.vitesse:
+				self.animal.deplacer(deplacement_proximite[random.randint(0,len(deplacement_proximite))]
+				
+			
+class Solitaire_faim(Etat):
+	def action(self):
+		case_disponible = self.animal.deplacements_possibles
+	# case_disponible est une liste des cases disponibles
+		position = self.animal.position
+	# position est un tuple (i,j)
+		herbivore_trouve = self.animal.detecter_herbivore
+	# herbivore_trouve = False si aucun d'herbivore n'est détecté
+	# herbivore_trouve = (i,j) si un herbivore est trouvé dans le voisinage
+		if herbivore_trouve == False:
+	# Solitaire se déplace aléatoirement sur une distance de "vitesse" case
+			for k in range self.animal.vitesse:
+				self.animal.deplacer((position[0]+1,position[1]) or (position[0]-1,position[1]) or (position[0],position[1]+1) or (position[0],position[1]-1) or (position[0]+1,position[1]+1) or (position[0]+1,position[1]-1) or (position[0]-1,position[1]-1) or (position[0]-1,position[1]+1)  
+	# Solitaire va se déplacer au hasard sur une des 8 positions situées juste à coté de lui et cela "vitesse" fois
+			if self.animal.detecter_herbivore == True:
+	# Solitaire lance la chasse : Pathfinder
+	*************************
+		else :
+	# Solitaire lance la chasse : Pathfinder
+	*************************
+		
+class Solitaire_soif(Etat):
+	def action(self):
+		case_disponible = self.animal.deplacements_possibles
+	# case_disponible est une liste des cases disponibles
+		position = self.animal.position
+	# position est un tuple (i,j)
+		eau_trouve = self.animal.detecter_eau
+	# eau_trouve = False si aucune case d'eau n'est détectée
+	# eau_trouve = (i,j) si une case d'eau est trouvée dans le voisinage
+		if eau_trouve == False:
+	# Solitaire se déplace aléatoirement sur une distance de "vitesse" case
+			for k in range self.animal.vitesse:
+				self.animal.deplacer((position[0]+1,position[1]) or (position[0]-1,position[1]) or (position[0],position[1]+1) or (position[0],position[1]-1) or (position[0]+1,position[1]+1) or (position[0]+1,position[1]-1) or (position[0]-1,position[1]-1) or (position[0]-1,position[1]+1) 
+				if self.animal.detecter_eau == True:
+	# Solitaire se dirige vers la case d'eau : Pathfinder
+	***************************
+		else :
+	# Solitaire se dirige vers la case d'eau : Pathfinder
+	***************************
+
+class Herbivore_normal(Etat):
+	def action(self):
+		if self.animal.a_faim == True:
+			self.animal.changer_etat(Solitaire_faim)
+		elif self.animal.a_soif == True:
+			self.animal.changer_etat(Solitaire_soif)
+			
+class Herbivore_soif(Etat):
+	def action(self):
+		case_disponible = self.animal.deplacements_possibles
+	# case_disponible est une liste des cases disponibles
+		position = self.animal.position
+	# position est un tuple (i,j)
+		eau_trouve = self.animal.detecter_eau
+	# eau_trouve = False si aucune case d'eau n'est détectée
+	# eau_trouve = (i,j) si une case d'eau est trouvée dans le voisinage
+		if eau_trouve == False:
+	# Herbivore se déplace aléatoirement sur une distance de "vitesse" case
+			for k in range self.animal.vitesse:
+				self.animal.deplacer((position[0]+1,position[1]) or (position[0]-1,position[1]) or (position[0],position[1]+1) or (position[0],position[1]-1) or (position[0]+1,position[1]+1) or (position[0]+1,position[1]-1) or (position[0]-1,position[1]-1) or (position[0]-1,position[1]+1) 
+				if self.animal.detecter_eau == True:
+	# Herbivore se dirige vers la case d'eau : Pathfinder
+	***************************
+		else :
+	# Herbivore se dirige vers la case d'eau : Pathfinder
+	***************************
+			
+class Meute_normal(Etat):
+	def action(self):
+		if self.animal.a_faim == True:
+			self.animal.changer_etat(Solitaire_faim)
+		elif self.animal.a_soif == True:
+			self.animal.changer_etat(Solitaire_soif)
+			
+class Meute_soif(Etat):
+	def action(self):
+		case_disponible = self.animal.deplacements_possibles
+	# case_disponible est une liste des cases disponibles
+		position = self.animal.position
+	# position est un tuple (i,j)
+		eau_trouve = self.animal.detecter_eau
+	# eau_trouve = False si aucune case d'eau n'est détectée
+	# eau_trouve = (i,j) si une case d'eau est trouvée dans le voisinage
+		if eau_trouve == False:
+	# Solitaire se déplace aléatoirement sur une distance de "vitesse" case
+			for k in range self.animal.vitesse:
+				self.animal.deplacer((position[0]+1,position[1]) or (position[0]-1,position[1]) or (position[0],position[1]+1) or (position[0],position[1]-1) or (position[0]+1,position[1]+1) or (position[0]+1,position[1]-1) or (position[0]-1,position[1]-1) or (position[0]-1,position[1]+1) 
+				if self.animal.detecter_eau == True:
+	# Meute se dirige vers la case d'eau : Pathfinder
+	***************************
+		else :
+	# Meute se dirige vers la case d'eau : Pathfinder
+	***************************
+					
