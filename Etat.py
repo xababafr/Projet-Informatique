@@ -81,17 +81,20 @@ class Solitaire_normal(Etat):
 		elif:
 	# Se deplacer aléatoirement
 			case_disponible = self.animal.deplacements_possibles
-	# case_disponible est une liste des cases disponibles
+	# case_disponible est une liste des cases disponibles dans la vision de l'animal
 			deplacement_proximite = [(position[0]+1,position[1]),(position[0]-1,position[1]),(position[0],position[1]+1),(position[0],position[1]-1),(position[0]+1,position[1]+1), (position[0]+1,position[1]-1),(position[0]-1,position[1]-1), (position[0]-1,position[1]+1)]
 	# On supprime tout les cases de proximité indisponible
-			for k in range len(deplacement_proximité):
-				if deplacement_proximite[i] is not in case_disponible:
-					deplacement_proximite.remove(deplacement_proximite[i])
-			position = self.animal.position
-	# position est un tuple (i,j)
 	# Solitaire se déplace aléatoirement sur une distance de "vitesse" case
 			for k in range self.animal.vitesse:
+	# On cherche toutes les cases disponibles à proximité	
+				for k in range len(deplacement_proximité):
+					if deplacement_proximite[i] is not in case_disponible:
+						deplacement_proximite.remove(deplacement_proximite[i])
+	# On deplace l'animal
 				self.animal.deplacer(deplacement_proximite[random.randint(0,len(deplacement_proximite))]
+				position = self.animal.position
+	# position est un tuple (i,j)
+	
 				
 			
 class Solitaire_faim(Etat):
@@ -103,16 +106,29 @@ class Solitaire_faim(Etat):
 		herbivore_trouve = self.animal.detecter_herbivore
 	# herbivore_trouve = False si aucun d'herbivore n'est détecté
 	# herbivore_trouve = (i,j) si un herbivore est trouvé dans le voisinage
-		if herbivore_trouve == False:
+		if herbivore_trouve == None:
+	# Se deplacer aléatoirement
+	# case_disponible est une liste des cases disponibles dans la vision de l'animal
+			deplacement_proximite = [(position[0]+1,position[1]),(position[0]-1,position[1]),(position[0],position[1]+1),(position[0],position[1]-1),(position[0]+1,position[1]+1), (position[0]+1,position[1]-1),(position[0]-1,position[1]-1), (position[0]-1,position[1]+1)]
+	# On supprime tout les cases de proximité indisponible
 	# Solitaire se déplace aléatoirement sur une distance de "vitesse" case
 			for k in range self.animal.vitesse:
-				self.animal.deplacer((position[0]+1,position[1]) or (position[0]-1,position[1]) or (position[0],position[1]+1) or (position[0],position[1]-1) or (position[0]+1,position[1]+1) or (position[0]+1,position[1]-1) or (position[0]-1,position[1]-1) or (position[0]-1,position[1]+1)  
-	# Solitaire va se déplacer au hasard sur une des 8 positions situées juste à coté de lui et cela "vitesse" fois
-			if self.animal.detecter_herbivore == True:
+	# On cherche toutes les cases disponibles à proximité	
+				for k in range len(deplacement_proximité):
+					if deplacement_proximite[i] is not in case_disponible:
+						deplacement_proximite.remove(deplacement_proximite[i])
+	# On deplace l'animal
+				self.animal.deplacer(deplacement_proximite[random.randint(0,len(deplacement_proximite))]
+				position = self.animal.position
+	# position est un tuple (i,j)
+			if self.animal.detecter_herbivore != None:
+				position = self.animal.position
 	# Solitaire lance la chasse : Pathfinder
+				position _herbivore = self.animal.detecter_herbivore
 	*************************
 		else :
 	# Solitaire lance la chasse : Pathfinder
+			position_herbivore = self.animal.detecter_herbivore 
 	*************************
 		
 class Solitaire_soif(Etat):
@@ -122,18 +138,35 @@ class Solitaire_soif(Etat):
 		position = self.animal.position
 	# position est un tuple (i,j)
 		eau_trouve = self.animal.detecter_eau
-	# eau_trouve = False si aucune case d'eau n'est détectée
+	# eau_trouve = None si aucune case d'eau n'est détectée
 	# eau_trouve = (i,j) si une case d'eau est trouvée dans le voisinage
-		if eau_trouve == False:
+		if eau_trouve == None:
+	# Se deplacer aléatoirement
+	# case_disponible est une liste des cases disponibles dans la vision de l'animal
+			deplacement_proximite = [(position[0]+1,position[1]),(position[0]-1,position[1]),(position[0],position[1]+1),(position[0],position[1]-1),(position[0]+1,position[1]+1), (position[0]+1,position[1]-1),(position[0]-1,position[1]-1), (position[0]-1,position[1]+1)]
+	# On supprime tout les cases de proximité indisponible
 	# Solitaire se déplace aléatoirement sur une distance de "vitesse" case
 			for k in range self.animal.vitesse:
-				self.animal.deplacer((position[0]+1,position[1]) or (position[0]-1,position[1]) or (position[0],position[1]+1) or (position[0],position[1]-1) or (position[0]+1,position[1]+1) or (position[0]+1,position[1]-1) or (position[0]-1,position[1]-1) or (position[0]-1,position[1]+1) 
-				if self.animal.detecter_eau == True:
+	# On cherche toutes les cases disponibles à proximité	
+				for k in range len(deplacement_proximité):
+					if deplacement_proximite[i] is not in case_disponible:
+						deplacement_proximite.remove(deplacement_proximite[i])
+	# On deplace l'animal
+				self.animal.deplacer(deplacement_proximite[random.randint(0,len(deplacement_proximite))]
+				position = self.animal.position
+	# position est un tuple (i,j)
+			if self.animal.detecter_eau != None:
 	# Solitaire se dirige vers la case d'eau : Pathfinder
+				position_eau = self.animal.detecter_eau
 	***************************
 		else :
 	# Solitaire se dirige vers la case d'eau : Pathfinder
+			position_eau = self.animal.detecter_eau
 	***************************
+
+#
+# Troupeau = problème : il faudrait que tous le troupeau MANGE en même temps et BOIT en même 
+#
 
 class Herbivore_normal(Etat):
 	def action(self):
@@ -149,19 +182,37 @@ class Herbivore_soif(Etat):
 		position = self.animal.position
 	# position est un tuple (i,j)
 		eau_trouve = self.animal.detecter_eau
-	# eau_trouve = False si aucune case d'eau n'est détectée
+	# eau_trouve = None si aucune case d'eau n'est détectée
 	# eau_trouve = (i,j) si une case d'eau est trouvée dans le voisinage
-		if eau_trouve == False:
-	# Herbivore se déplace aléatoirement sur une distance de "vitesse" case
+		if eau_trouve == None:
+	# Se deplacer aléatoirement
+	# case_disponible est une liste des cases disponibles dans la vision de l'animal
+			deplacement_proximite = [(position[0]+1,position[1]),(position[0]-1,position[1]),(position[0],position[1]+1),(position[0],position[1]-1),(position[0]+1,position[1]+1), (position[0]+1,position[1]-1),(position[0]-1,position[1]-1), (position[0]-1,position[1]+1)]
+	# On supprime tout les cases de proximité indisponible
+	# Solitaire se déplace aléatoirement sur une distance de "vitesse" case
 			for k in range self.animal.vitesse:
-				self.animal.deplacer((position[0]+1,position[1]) or (position[0]-1,position[1]) or (position[0],position[1]+1) or (position[0],position[1]-1) or (position[0]+1,position[1]+1) or (position[0]+1,position[1]-1) or (position[0]-1,position[1]-1) or (position[0]-1,position[1]+1) 
-				if self.animal.detecter_eau == True:
-	# Herbivore se dirige vers la case d'eau : Pathfinder
+	# On cherche toutes les cases disponibles à proximité	
+				for k in range len(deplacement_proximité):
+					if deplacement_proximite[i] is not in case_disponible:
+						deplacement_proximite.remove(deplacement_proximite[i])
+	# On deplace l'animal
+				self.animal.deplacer(deplacement_proximite[random.randint(0,len(deplacement_proximite))]
+				position = self.animal.position
+	# position est un tuple (i,j)
+			if self.animal.detecter_eau != None:
+	# Solitaire se dirige vers la case d'eau : Pathfinder
+				position_eau = self.animal.detecter_eau
 	***************************
 		else :
-	# Herbivore se dirige vers la case d'eau : Pathfinder
+	# Solitaire se dirige vers la case d'eau : Pathfinder
+			position_eau = self.animal.detecter_eau
 	***************************
 			
+
+#
+# Meute = problème il faudrait que toute la meute BOIVENT en même temps et MANGE en même temps
+#
+
 class Meute_normal(Etat):
 	def action(self):
 		if self.animal.a_faim == True:
@@ -176,16 +227,29 @@ class Meute_soif(Etat):
 		position = self.animal.position
 	# position est un tuple (i,j)
 		eau_trouve = self.animal.detecter_eau
-	# eau_trouve = False si aucune case d'eau n'est détectée
+	# eau_trouve = None si aucune case d'eau n'est détectée
 	# eau_trouve = (i,j) si une case d'eau est trouvée dans le voisinage
-		if eau_trouve == False:
+		if eau_trouve == None:
+	# Se deplacer aléatoirement
+	# case_disponible est une liste des cases disponibles dans la vision de l'animal
+			deplacement_proximite = [(position[0]+1,position[1]),(position[0]-1,position[1]),(position[0],position[1]+1),(position[0],position[1]-1),(position[0]+1,position[1]+1), (position[0]+1,position[1]-1),(position[0]-1,position[1]-1), (position[0]-1,position[1]+1)]
+	# On supprime tout les cases de proximité indisponible
 	# Solitaire se déplace aléatoirement sur une distance de "vitesse" case
 			for k in range self.animal.vitesse:
-				self.animal.deplacer((position[0]+1,position[1]) or (position[0]-1,position[1]) or (position[0],position[1]+1) or (position[0],position[1]-1) or (position[0]+1,position[1]+1) or (position[0]+1,position[1]-1) or (position[0]-1,position[1]-1) or (position[0]-1,position[1]+1) 
-				if self.animal.detecter_eau == True:
-	# Meute se dirige vers la case d'eau : Pathfinder
+	# On cherche toutes les cases disponibles à proximité	
+				for k in range len(deplacement_proximité):
+					if deplacement_proximite[i] is not in case_disponible:
+						deplacement_proximite.remove(deplacement_proximite[i])
+	# On deplace l'animal
+				self.animal.deplacer(deplacement_proximite[random.randint(0,len(deplacement_proximite))]
+				position = self.animal.position
+	# position est un tuple (i,j)
+			if self.animal.detecter_eau != None:
+	# Solitaire se dirige vers la case d'eau : Pathfinder
+				position_eau = self.animal.detecter_eau
 	***************************
 		else :
-	# Meute se dirige vers la case d'eau : Pathfinder
+	# Solitaire se dirige vers la case d'eau : Pathfinder
+			position_eau = self.animal.detecter_eau
 	***************************
 					

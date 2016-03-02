@@ -34,7 +34,7 @@ class AStar():
 		self.cells = []
 		n = len(MAP)
 
-		# ontravaillera toujours avec une grille carree
+		# on travaillera toujours avec une grille carree
 		self.dim = n
 		
 		##NON, VOIR EN DESSOUS
