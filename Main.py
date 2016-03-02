@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
+
 import sys
-sys.path.append(os.getcwd())
+sys.path.append('/Users/xababafr/Documents/Projet-Informatique')
 import numpy as np
 from Animal import *
 from Map import *

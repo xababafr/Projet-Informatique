@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 ## representation d'une map
 # C'est un tableau n x n, et chaque case de ce tableau
 # est une liste [indice_sol,objet_animal]
@@ -16,7 +18,6 @@
 # In [23]: a
 # Out[23]: <__main__.Animal at 0x1097350b8>
 
-
 ## truc utile : 
 # a = np.empty((50,50),dtype=object)
 # a[3,2] = Case()
@@ -32,9 +33,10 @@ from math import sqrt
 
 class Map:
 
-    def __init__(self, MAP):
+    def __init__(self, MAP,rien):
         self.MAP = MAP
         self.dim = len(MAP)
+        self.rien = rien
         
     # je suppose pr le moment qu'un n'y a qu'un animal par case
 
@@ -62,14 +64,15 @@ class Map:
         Py = position[1]
         Dx = position2[0]
         Dy = position2[1]    
-        self.MAP[Dx,Dy][1] = self.MAP[Px,Py][1]
-        self.MAP[Px,Py][1] = Rien()
+        self.MAP[Dx,Dy][1] , self.MAP[Px,Py][1] = self.MAP[Px,Py][1] , self.MAP[Dx,Dy][1]
         
     def suppression(self,position):
+        
         # position est un tuple (x,y)
         Px = position[0]
         Py = position[1]
-        self.MAP[Px,Py][1] = Rien()
+        
+        self.MAP[Px,Py][1] = self.rien
         
     def distance_max(self):
         xmin = 0
@@ -92,12 +95,14 @@ class Map:
 
 if __name__ == "__main__":
     
-    #on cree un animal inutile, juste pour le test
+    # pour tester les differentes fonctions de la classe, on a besoin
+    # d'une classe animal et d'une classe Rien, et d'une carte que l'on appelle mappy
     class Animal_vide:
         def __init__(self):
+            print("dada")
             pass
             
-    class Rien():
+    class Rien:
         def __init__(self):
             pass
             
@@ -112,7 +117,7 @@ if __name__ == "__main__":
         [[0,Rien()],[1,Rien()],[0,Rien()],[0,Rien()],[0,Rien()],[0,Rien()]]
     ])
     
-    m = Map(mappy)
+    m = Map(mappy,Rien())
     
     V = m.voisinnage((3,3),2)
     
@@ -122,7 +127,7 @@ if __name__ == "__main__":
     
     m.deplacer((3,3),(2,2))
     
-    assert (isinstance(m.MAP[3,3][1],Rien) and m.MAP[2,2][1] == animal), \
+    assert (isinstance(m.MAP[3,3][1],Rien) and isinstance(m.MAP[2,2][1],Animal_vide)), \
     "Erreur : deplacer"
     print("Ok : deplacer")
     

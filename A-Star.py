@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import heapq
 import numpy as np
 
@@ -114,7 +116,6 @@ if __name__ == "__main__":
 		def __init__(self):
 			pass
 		
-	animal = Animal_vide()
 
 	mappy = np.array([
 		[[0,Rien()],[0,Rien()],[0,Rien()],[0,Rien()],[0,Rien()],[1,Rien()]],

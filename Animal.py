@@ -1,4 +1,11 @@
+# -*- coding: utf-8 -*-
+
 #import numpy as np
+
+import sys
+sys.path.append('/Users/xababafr/Documents/Projet-Informatique')
+import numpy as np
+
 from abc import ABCMeta , abstractmethod
 #from Map import Map
 
@@ -6,7 +13,7 @@ from abc import ABCMeta , abstractmethod
 
 class Animal():
     """
-        Classe décrivant un animal dont le comportement
+        Classe decrivant un animal dont le comportement
         est defini dans plusieurs autres classes comportement
     """
        
@@ -18,21 +25,21 @@ class Animal():
             
         """
         
-        # J'ai retiré le paramètre self.proie. En fait, il faudra bien faire un comportement diffèrent
+        # J'ai retire le parametre self.proie. En fait, il faudra bien faire un comportement different
         # pour herbivore et carnivore. Effectivement, le lapin recherche sa "proie" dans la premiere case
         # d'une position de la ecosysteme.MAP (herbe), tandis que le carnivore la recherche dans la seconde case.
-        # un algo différent dera donc a implementer
+        # un algo différent sera donc a implementer
         
         #ecosysteme.MAP = ecosysteme.MAP
         #self.LIVING = LIVING
-        self.__faim = faim
-        self.__soif = soif
+        self._faim = faim
+        self._soif = soif
         self.vision = vision
         self.vitesse = vitesse
         self.vie = vie
-        self.__position = position
+        self._position = position
         self.rang = rang
-        self.__etat = etat
+        self._etat = etat
         
     # à surcharger
     @abstractmethod
@@ -58,27 +65,27 @@ class Animal():
     # on fais donc le getter et le setter
     @property
     def faim(self):
-        return self.__faim
+        return self._faim
 
     @faim.setter
     def faim(self,f):
-        self.__faim = f
-        if self.__faim > 24:
-            self.__faim = 24
-        if self.__faim < 0:
-            self.__faim = 0
+        self._faim = f
+        if self._faim > 24:
+            self._faim = 24
+        if self._faim < 0:
+            self._faim = 0
 
     @property
     def soif(self):
-        return self.__soif
+        return self._soif
 
     @soif.setter
     def soif(self,s):
-        self.__soif = s
-        if self.__soif > 24:
-            self.__soif = 24
-        if self.__soif < 0:
-            self.__soif = 0
+        self._soif = s
+        if self._soif > 24:
+            self._soif = 24
+        if self._soif < 0:
+            self._soif = 0
 
     # De même, on vérifie que la position ne dépasse jamais les limites de la map
     # Deux solutions : les bords de la map sont des murs, ou
@@ -87,7 +94,7 @@ class Animal():
 
     @property
     def position(self):
-        return self.__position
+        return self._position
 
     ## On suppose l'exisence d'un attribut dim dans ecosysteme.MAP, qui est la dimension de l'array numpy
     @position.setter
@@ -101,13 +108,13 @@ class Animal():
             y = 0
         if y > ecosysteme.MAP.dim:
             y = ecosysteme.MAP.dim-1
-        self.__position = (x,y)
+        self._position = (x,y)
 
     # Enfin, je met l'état actuel en lecture seule, on a pas trop envie que ce paramètre soit bidouillé
     @property 
     def etat(self):
         # Suppose la surcharge de __str__ dans chaque état
-        return(str(self.__etat))
+        return(str(self._etat))
 
     def __str__(self):
         texte = 'faim : {} \nsoif : {} \nvision : {} \nvitesse : {} \nvie : {} \nposition : {}\nrang : {}\netat : {} \n'.format(self.faim,self.soif,self.vision,self.vitesse,self.vie,self.position,self.rang,self.etat)
@@ -115,7 +122,7 @@ class Animal():
         return(texte)
         
     def changer_etat(self,etat):
-        self.etat = etat
+        self._etat = etat
         
     def un_tour(self):
         self.vie -= 1
@@ -135,14 +142,14 @@ class Animal():
         """
         ecosysteme.MAP.suppression(self.position) # Créer une méthode suppression dans ecosysteme.MAP
         # Comme on supprime un élèment de LIVING, le rang de tous ceux derriere celui de l'animal supprimé diminue de 1
-        for a in LIVING[self.rang+1:]:
+        for a in ecosysteme.LIVING[self.rang+1:]:
             a.rang -= 1
-        del LIVING[self.rang]
+        del ecosysteme.LIVING[self.rang]
         
     def manger(self,quantite):
         # Pour le manger des predateurs, il faudra surcharger la méthode
         # car on a dit que lorsque qu'un prédateur mange, il remplit sa barre d'appétit
-        self.appetit += quantite
+        self.faim += quantite
         
     def boire(self,quantite):
         self.soif += quantite
@@ -158,7 +165,8 @@ class Animal():
             qui renvoie la position (x,y) de la case d'eau la + proche si elle existe
         """
         # V est un tableau n x n, ou n est la vision de l'animal 
-        V = ecosysteme.MAP.voisinage(self.position,self.vision)
+        x,y,v = self.position[0], self.position[1],self.vision
+        V = ecosysteme.MAP.voisinnage(self.position,self.vision)
         taille = len(V)
         # L'eau la plus proche de l'animal trouvée actuellement
         eau_trouvee = False
@@ -170,7 +178,8 @@ class Animal():
                     # Si celle-ci est plus proche de l'animal que l'ancienne eau
                     distance_locale = ecosysteme.MAP.distance(self.position,(i,j))
                     if (distance_locale < distance):
-                        eau_trouvee = (i,j)
+                        #eau_trouvee = (i,j) ## TESSTTTTT
+                        eau_trouvee = (x+i-v,y+j-v)
                         distance = distance_locale
         return eau_trouvee
 
@@ -362,6 +371,9 @@ class Meute(Animal):
 
 class Rien():
     
+    def __init__(self):
+        pass
+    
     def is_herbivore(self):
         return False
     
@@ -369,7 +381,100 @@ class Rien():
         return False
         
     
+if __name__ == "__main__":
     
+    # on a besoin d'une map pour tester les fonction de animal
+    # on va donc creer un ecosysteme contenant une instance de Map()
+    # on a aussi besoin d'objets etat,  ils peuvent etre vides pources tests, c'est suffisant
+    
+    from Map import *
+    
+    class EtatA():
+        def __init__(self):
+            pass
+            
+        def __str__(self):
+            return("A")
+            
+            
+    class EtatB():
+        def __init__(self):
+            pass
+            
+        def __str__(self):
+            return("B")
+       
+            
+    class Ecosysteme():
+        def __init__(self,MAP,LIVING):
+            self.MAP = MAP
+            self.LIVING = LIVING
+    
+    
+    lapin = Animal(12,15,2,1,480,(1,1),0,EtatA())
+    loup = Animal(10,20,3,3,240,(3,3),1,EtatB())
+    mouton = Animal(12,15,2,1,460,(5,5),2,EtatA())
+    cheval = Animal(10,20,3,3,260,(2,5),3,EtatB())
+    
+    mappy = np.array([
+        [[0,Rien()],[0,Rien()],[0,Rien()],[0,Rien()],[0,Rien()],[1,Rien()]],
+        [[1,Rien()],[0, lapin],[0,Rien()],[0,Rien()],[0,Rien()],[1,Rien()]], #lapin
+        [[0,Rien()],[0,Rien()],[0,Rien()],[1,Rien()],[0,Rien()],[0,cheval]], #cheval
+        [[0,Rien()],[1,Rien()],[1,Rien()],[0,  loup],[0,Rien()],[1,Rien()]], #loup
+        [[0,Rien()],[1,Rien()],[0,Rien()],[0,Rien()],[1,Rien()],[0,Rien()]],
+        [[0,Rien()],[1,Rien()],[0,Rien()],[0,Rien()],[0,Rien()],[0,mouton]] #mouton
+    ])
+    
+    
+    ## pour la MAP, je n'ai pas trouvé d'autre solution que lui passer un objet Rien()
+    ## pour faire ses manipulations, sinon il y a des erreurs... affaire à suivre
+    rien = Rien()
+    MAP = Map(mappy,rien)
+    LIVING = [lapin,loup,mouton,cheval]
+    
+    ecosysteme = Ecosysteme(MAP,LIVING)
+    
+    # on a initialisé toutes les variables / objets necessaires, on peut commencer les tests
+    
+    lapin.faim, lapin.soif, lapin.position = 35, -4, (-7,10)
+    
+    # les getter et setters ne sont pas appellés dans le constructeur de Animal, c'est vonlontaire
+    # mais ça veut dire que lors de la création des animaux, on doit rentrer des infos valides
+    
+    assert (lapin.faim == 24 and lapin.soif == 0 and lapin.position == (0,5) and lapin.etat == 'A'), \
+    "Erreur : getters et setters de faim, soif et position"
+    print("Ok : getters et setters de faim, soif, position et etat")
+    
+    lapin.position = (1,1) # on le remet là où il etait
+    
+    loup.mourir()
+    
+    # on verifie que tout a bien été supprimé dans living
+    # la fonction Map.suppression a déjà été vérifiée donc pas besoin de checker la carte également
+    def check_mourir():
+        if len(ecosysteme.LIVING) != 3:
+            return False
+        else:
+            for i in range(3):
+                if ecosysteme.LIVING[i].rang != i:
+                    return False
+        return True
+    
+    assert (check_mourir()), "Erreur : mourir"
+    print("Ok : mourir")
+    
+    lapin.changer_etat(EtatB())
+    
+    assert (lapin.etat =='B'), "Erreur : changer_etat"
+    print("Ok : changer etat")
+    
+    # si mourir() esr OK, un_tour() aussi, donc on verif' pas
+    # manger(), boire() sont trivialement correctes
+    
+    lapin.deplacer((2,2))
+    
+    assert(isinstance(ecosysteme.MAP.infos((1,1))[1],Rien) and isinstance(ecosysteme.MAP.infos((2,2))[1],Animal) and lapin.position == (2,2)), "Erreur : deplacer"
+    print("Ok : deplacer")
         
 
 #lapin = Animal(1,2,3,4,5,6,7,8)
