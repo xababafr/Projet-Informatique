@@ -255,8 +255,47 @@ class Animal():
                 else :
                     deplacement_possible = deplacement_possible.append[i,j]
         return deplacement_possible
-            
-
+        
+   ## def rester_ensemble_Herbivore(self,vision):
+        """
+            Fonction pour que les herbivores et les meutes se regroupent lorsqu'ils se croisent
+        """
+        # V est un tableau n x n, ou n est la vision de l'animal 
+        x,y,v = self.position[0], self.position[1],self.vision
+        V = ecosysteme.MAP.voisinnage(self.position,self.vision)
+        taille = len(V)
+        # On cherche le copain
+        copain = False
+        distance = ecosysteme.MAP.distance_max()
+        for i in range(taille):
+            for j in range(taille):
+                # Si c'est un Herbivore (on manipule un array numpy)
+                if V[i,j][1] == Herbivore:
+                        #eau_trouvee = (i,j) ## TESSTTTTT
+                        eau_trouvee = (x+i-v,y+j-v)
+                        distance = distance_locale
+        return eau_trouvee
+    
+   ## def rester_ensemble_Meute(self,vision):
+         """
+            Fonction pour que les herbivores et les meutes se regroupent lorsqu'ils se croisent
+        """
+        # V est un tableau n x n, ou n est la vision de l'animal 
+        x,y,v = self.position[0], self.position[1],self.vision
+        V = ecosysteme.MAP.voisinnage(self.position,self.vision)
+        taille = len(V)
+        # On cherche le copain
+        copain = False
+        distance = ecosysteme.MAP.distance_max()
+        for i in range(taille):
+            for j in range(taille):
+                # Si c'est un Herbivore (on manipule un array numpy)
+                if V[i,j][1] == Herbivore:
+                        #eau_trouvee = (i,j) ## TESSTTTTT
+                        eau_trouvee = (x+i-v,y+j-v)
+                        distance = distance_locale
+        return eau_trouvee
+        
 
 class Herbivore(Animal):
 
@@ -289,11 +328,6 @@ class Herbivore(Animal):
     # Avoir peur c'est comme détecter un prédateur    
     # def a_peur(self): 
         
-
-
-
-
-
        
 class Solitaire(Animal):
     # Le prédateur solitaire se déplace vite et à une grande vision, mais a une durée de vie plus faible que les herbivores
