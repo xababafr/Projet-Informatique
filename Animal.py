@@ -190,11 +190,12 @@ class Animal():
             qui renvoi la position (x,y) de la case de l'herbivore le + proche si il est visible
         """
         # V est un tableau n x n, ou n est la vision de l'animal 
-        V = ecosysteme.MAP.voisinage(self.position,self.vision)
+        V = ecosysteme.MAP.voisinnage(self.position,self.vision)
         taille = len(V)
         # L'herbivore le plus proche de l'animal trouvé actuellement
         herbivore_trouve = False
         distance = ecosysteme.MAP.distance_max()
+        x,y,v = self.position[0],self.position[1],self.vision
         for i in range(taille):
             for j in range(taille):
                 ## De même, je suppose l'existence d'une méthode is_herbivore
@@ -203,7 +204,7 @@ class Animal():
                     # Si celui-ci est plus proche de l'animal que l'ancien herbivore
                     distance_locale = ecosysteme.MAP.distance(self.position,(i,j))
                     if (distance_locale < distance):
-                        herbivore_trouve = (i,j)
+                        herbivore_trouve = (x+i-v,y+j-v)
                         distance = distance_locale
         return herbivore_trouve
 
@@ -214,7 +215,8 @@ class Animal():
             qui renvoi la position (x,y) de la case du prédateur le + proche si il est visible
         """
         # V est un tableau n x n, ou n est la vision de l'animal 
-        V = ecosysteme.MAP.voisinage(self.position,self.vision)
+        V = ecosysteme.MAP.voisinnage(self.position,self.vision)
+        x,y,v = self.position[0],self.position[1],self.vision
         taille = len(V)
         # Prédateur le plus proche de l'animal trouvé actuellement
         predateur_trouve = False
@@ -226,11 +228,11 @@ class Animal():
                 ## aussi de définir une classe Rien qui aura cette méthode, pour que l'on puisse mettre une
                 ## instance de cette classe dans les cases où il n'y a pas d'animaux
                 # Si c'est un prédateur
-                if (not (V[i,j][1]).is_herbivore()):
+                if ((V[i,j][1]).is_predateur()):
                     # Si cette distance est plus petite que l'ancienne
                     distance_locale = ecosysteme.MAP.distance(self.position,(i,j))
                     if (distance_locale < distance):
-                        predateur_trouve = (i,j)
+                        predateur_trouve = (x+i-v,y+j-v)
                         distance = distance_locale
         return predateur_trouve
         
@@ -242,7 +244,8 @@ class Animal():
             Pour une première approximation, on dira que l'on peux même marcher sur l'eau (juste des petites mares)
         """
         # V est un tableau n x n, où n est la vision de l'animal
-        V=ecosysteme.MAP.voisinage(self.position,self.vision)
+        V=ecosysteme.MAP.voisinnage(self.position,self.vision)
+        x,y,v = self.position[0],self.position[1],self.vision
         # Les déplacements possibles seront inscrits dans une liste déplacement_possibles
         deplacement_possible = []
         taille = len(V)
@@ -250,13 +253,13 @@ class Animal():
         # On check toutes les cases de V
         for i in range (taille):
             for j in range (taille):
-                if V[0] == 1:
-                    position_eau = position_eau.append[i,j]
+                if V[i,j][0] == 1:
+                    position_eau.append((x+i-v,y+j-v))
                 else :
-                    deplacement_possible = deplacement_possible.append[i,j]
+                    deplacement_possible.append((x+i-v,y+j-v))
         return deplacement_possible
         
-   ## def rester_ensemble_Herbivore(self,vision):
+    def rester_ensemble_Herbivore(self,vision):
         """
             Fonction pour que les herbivores et les meutes se regroupent lorsqu'ils se croisent
         """
@@ -276,8 +279,8 @@ class Animal():
                         distance = distance_locale
         return eau_trouvee
     
-   ## def rester_ensemble_Meute(self,vision):
-         """
+    def rester_ensemble_Meute(self,vision):
+        """
             Fonction pour que les herbivores et les meutes se regroupent lorsqu'ils se croisent
         """
         # V est un tableau n x n, ou n est la vision de l'animal 
@@ -303,8 +306,8 @@ class Herbivore(Animal):
     # l'etat est une instance de Normal_herbivore, dont on passe en argument l'animal ayant le comportement concerne (le constructeur de chaque etat prends en parametre l'objet animal concerne par le comportement)
     # le comportement a ainsi acces a toutes les methodes et attributs de l'animal, ce qui lui permet de prendre des decisions
 
-    def __init__(self,faim,soif,position,rang,etat):
-        super.__init__(24,24,3,1,120,position,rang,Herbivore_normal(self))
+    def __init__(self,position,rang,etat):
+        super().__init__(24,24,3,1,120,position,rang,etat)
         
     # à surcharger
     def is_herbivore(self):
@@ -331,8 +334,8 @@ class Herbivore(Animal):
        
 class Solitaire(Animal):
     # Le prédateur solitaire se déplace vite et à une grande vision, mais a une durée de vie plus faible que les herbivores
-    def __init__(self,faim,soif,position,rang,etat):
-        super.__init__(24,24,6,3,72,position,rang,Solitaire_normal(self))
+    def __init__(self,position,rang,etat):
+        super().__init__(24,24,6,3,72,position,rang,etat)
         
     # est un prédateur
     def is_herbivore(self):
@@ -368,8 +371,8 @@ class Solitaire(Animal):
 class Meute(Animal):
     # Le prédateur en Meute se deplace vite et à une vision moyenne, mais a une durée de vie plus faible que les herbivores
     # Il ne faut pas leur donner une vue trop forte, sinon, il vont raser des troupeaux d'herbivores tout le temps
-    def __init__(self,faim,soif,position,rang,etat):
-        super.__init__(24,24,4,2,96,position,rang,Meute_normal(self))
+    def __init__(self,position,rang,etat):
+        super().__init__(24,24,4,2,96,position,rang,etat)
         
     # est un prédateur
     def is_herbivore(self):
@@ -449,14 +452,16 @@ if __name__ == "__main__":
     loup = Animal(10,20,3,3,240,(3,3),1,EtatB())
     mouton = Animal(12,15,2,1,460,(5,5),2,EtatA())
     cheval = Animal(10,20,3,3,260,(2,5),3,EtatB())
+    chevre = Herbivore((4,5),4,EtatA())
+    lion = Solitaire((2,1),5,EtatA())
     
     mappy = np.array([
         [[0,Rien()],[0,Rien()],[0,Rien()],[0,Rien()],[0,Rien()],[1,Rien()]],
         [[1,Rien()],[0, lapin],[0,Rien()],[0,Rien()],[0,Rien()],[1,Rien()]], #lapin
-        [[0,Rien()],[0,Rien()],[0,Rien()],[1,Rien()],[0,Rien()],[0,cheval]], #cheval
+        [[0,Rien()],[0,lion],[0,Rien()],[1,Rien()],[0,Rien()],[0,cheval]], #cheval
         [[0,Rien()],[1,Rien()],[1,Rien()],[0,  loup],[0,Rien()],[1,Rien()]], #loup
-        [[0,Rien()],[1,Rien()],[0,Rien()],[0,Rien()],[1,Rien()],[0,Rien()]],
-        [[0,Rien()],[1,Rien()],[0,Rien()],[0,Rien()],[0,Rien()],[0,mouton]] #mouton
+        [[0,Rien()],[1,Rien()],[0,Rien()],[0,Rien()],[1,Rien()],[0,chevre]], #chevre
+        [[0,Rien()],[1,Rien()],[0,Rien()],[0,Rien()],[0,Rien()],[0,mouton]] #mouton et lion
     ])
     
     
@@ -464,7 +469,7 @@ if __name__ == "__main__":
     ## pour faire ses manipulations, sinon il y a des erreurs... affaire à suivre
     rien = Rien()
     MAP = Map(mappy,rien)
-    LIVING = [lapin,loup,mouton,cheval]
+    LIVING = [lapin,loup,mouton,cheval,chevre,lion]
     
     ecosysteme = Ecosysteme(MAP,LIVING)
     
@@ -486,10 +491,10 @@ if __name__ == "__main__":
     # on verifie que tout a bien été supprimé dans living
     # la fonction Map.suppression a déjà été vérifiée donc pas besoin de checker la carte également
     def check_mourir():
-        if len(ecosysteme.LIVING) != 3:
+        if len(ecosysteme.LIVING) != 5:
             return False
         else:
-            for i in range(3):
+            for i in range(5):
                 if ecosysteme.LIVING[i].rang != i:
                     return False
         return True
@@ -509,7 +514,14 @@ if __name__ == "__main__":
     
     assert(isinstance(ecosysteme.MAP.infos((1,1))[1],Rien) and isinstance(ecosysteme.MAP.infos((2,2))[1],Animal) and lapin.position == (2,2)), "Erreur : deplacer"
     print("Ok : deplacer")
-        
+    
+    assert(mouton.detecter_eau() == (4,4) and mouton.detecter_herbivore() == (4,5) and lapin.detecter_predateur() == (2,1)), "Erreur : fonctions detecter_..."
+    print("Ok : fonctions detecter_...")
+    
+    dpl = [(0, 0),(0, 1),(0, 2),(0, 3),(0, 4),(1, 1),(1, 2),(1, 3),(1, 4),(2, 0),(2, 1),(2, 2),(2, 4),(3, 0),(3, 3),(3, 4),(4, 0),(4, 2),(4, 3)]
+    
+    assert(lapin.deplacements_possibles() == dpl), "Erreur : deplacements possibles"
+    print("Ok : deplacements possibles")
 
 #lapin = Animal(1,2,3,4,5,6,7,8)
 #mouton = Animal(2,1,4,3,5,7,6,8)
