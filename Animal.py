@@ -264,40 +264,41 @@ class Animal():
             Fonction pour que les herbivores et les meutes se regroupent lorsqu'ils se croisent
         """
         # V est un tableau n x n, ou n est la vision de l'animal 
-        x,y,v = self.position[0], self.position[1],self.vision
-        V = ecosysteme.MAP.voisinnage(self.position,self.vision)
-        taille = len(V)
+        x,y,v = self.position[0], self.position[1], self.vision
+        voisinage = ecosysteme.MAP.voisinnage(self.position,self.vision)
+        taille = len(voisinage)
+        # taille contient un tableau numpy de la vision de l'animal
+        deplacement_possible = []
+        deplacement_possible_ideal = []
+        position_ideale = ()
+        distance_ideal = 2 # on laisse une case libre de distance entre l'animal et le copain : type pièce tour aux échecs
         # On cherche le copain
+        position_copain = []
         copain = False
-        distance = ecosysteme.MAP.distance_max()
         for i in range(taille):
             for j in range(taille):
-                # Si c'est un Herbivore (on manipule un array numpy)
-                if V[i,j][1] == Herbivore:
-                        #eau_trouvee = (i,j) ## TESSTTTTT
-                        eau_trouvee = (x+i-v,y+j-v)
-                        distance = distance_locale
-        return eau_trouvee
-    
-    def rester_ensemble_Meute(self,vision):
-        """
-            Fonction pour que les herbivores et les meutes se regroupent lorsqu'ils se croisent
-        """
-        # V est un tableau n x n, ou n est la vision de l'animal 
-        x,y,v = self.position[0], self.position[1],self.vision
-        V = ecosysteme.MAP.voisinnage(self.position,self.vision)
-        taille = len(V)
-        # On cherche le copain
-        copain = False
-        distance = ecosysteme.MAP.distance_max()
-        for i in range(taille):
-            for j in range(taille):
-                # Si c'est un Herbivore (on manipule un array numpy)
-                if V[i,j][1] == Herbivore:
-                        #eau_trouvee = (i,j) ## TESSTTTTT
-                        eau_trouvee = (x+i-v,y+j-v)
-                        distance = distance_locale
-        return eau_trouvee
+        # Si c'est un Herbivore (on manipule un array numpy)
+                if voisinage[i,j][1] == Herbivore:
+                    position_copain = position_copain.append(i,j)
+        # L'animal suit le 1er animal rencontré, je n'ai pas eu d'autre idée
+                    distance_animal_copain = self.MAP.distance(self.position,position_copain[0]))
+        # deplacement_possible contient la liste de toutes les positions situés dans le champ de vision de l'animal
+                    for i in range self.vision:
+                        for j in range self.vision
+                            deplacement_possible.append(i,j)
+        # deplacement_possible_ideal contient la liste de toutes les positions situés à une distance de 2 du copain                    
+                    for k in range len(deplacement_possible):
+                        if self.MAP.distance(deplacement_possible[k],position_copain[0]) == 2:
+                            deplacement_possible_ideal.append(deplacement_possible[k])
+        # position_ideale contien la position la plus proche situé à une distance de 2 du copain
+                    for l in range len(deplacement_possible_ideale):
+                        position_ideale = min(self.MAP.distance(self.position, deplacement_possible_ideal[l])
+        # on retourne LA position_ideale; si il n'y a pas de copain, on renvoit False
+                    return position_ideale
+                else:
+                    return False
+                
+                
         
 
 class Herbivore(Animal):
