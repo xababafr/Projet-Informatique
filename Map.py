@@ -34,8 +34,25 @@ from math import sqrt
 class Map:
 
     def __init__(self, MAP,rien):
-        self.MAP = MAP
-        self.dim = len(MAP)
+        ## à voir
+        #self.MAP = np.pad(MAP,3,mode='constant',constant_values=[1,-1])
+        M = []
+        
+        # on créé la bordure de la map avec de l'eau
+        
+        l = len(MAP)+6
+        for i in range(l):
+            L = []
+            for j in range(l):
+                L.append([3,rien])
+            M.append(L)
+        M = np.array(M)
+        
+        M[3:l-3,3:l-3] = MAP
+        
+        self.MAP = M
+        
+        self.dim = len(MAP)+6
         self.rien = rien
         
     # je suppose pr le moment qu'un n'y a qu'un animal par case
@@ -44,9 +61,18 @@ class Map:
     def infos(self,position):
         return self.MAP[position[0],position[1]] # ou alors pk pas surcharger __getitem__()
         
-    # sol = 0
-    # herbe = 1
-    # eau = 2
+    # herbe = 0
+    # eau = 1
+    # sol = 2
+    # cailou = 3
+    
+    """def coord_correcte(self,c):
+        if c < 0:
+            return 0
+        elif c >= self.dim:
+            return (self.dim-1)
+        else:
+            return c"""
         
     # retourne un array vide si on est au bord et que la vision ne va pas sufissament loin
     def voisinnage(self,position,vision):
@@ -65,6 +91,11 @@ class Map:
         Dx = position2[0]
         Dy = position2[1]    
         self.MAP[Dx,Dy][1] , self.MAP[Px,Py][1] = self.MAP[Px,Py][1] , self.MAP[Dx,Dy][1]
+        
+    # besoin d'assert celle-ci?
+    def add_animal(self,animal):
+        x,y = animal.position[0],animal.position[1]
+        self.MAP[x,y][1] = animal
         
     def suppression(self,position):
         
@@ -91,6 +122,42 @@ class Map:
         Dy = position2[1]
         Dist = sqrt((Dx-Px)**2+(Dy-Py)**2)
         return (Dist)
+        
+    def Map_to_visible(self,MAP):
+        M = []
+        for l in MAP:
+            L = []
+            for c in l:
+                L.append([c[0],c[1].rang_naturel])
+            M.append(L)
+        return(M)
+        
+    # affiche une version "visible" de la map, juste 1 affichage primaire
+    def visible_to_printable(self,MAP = []):
+        print('')
+        if MAP == []:
+            MAP = self.MAP
+        M = self.Map_to_visible(MAP)
+        t = '*  '
+        for i in range(len(M)):
+            t += str(i%10) + ' '
+        print(t)
+        print('')
+        c = 0
+        for l in M:
+            txt = str(c%10)+'  '
+            for case in l:
+                if case[1] != 0:
+                    txt += str(case[1]) + ' '
+                else:
+                    #pourrait etre ecrit bien + facilement avec une liste
+                    
+                    L = ['#','@','-','+']
+                    
+                    txt += L[case[0]] + ' '
+                    
+            print(txt)
+            c +=1
 
 
 if __name__ == "__main__":
@@ -99,14 +166,15 @@ if __name__ == "__main__":
     # d'une classe animal et d'une classe Rien, et d'une carte que l'on appelle mappy
     class Animal_vide:
         def __init__(self):
-            print("dada")
-            pass
+            self.rang_naturel = 1
             
     class Rien:
         def __init__(self):
-            pass
+            self.rang_naturel = 0
             
     animal = Animal_vide()
+    
+                    
     
     mappy = np.array([
         [[0,Rien()],[0,Rien()],[0,Rien()],[0,Rien()],[0,Rien()],[1,Rien()]],
@@ -125,9 +193,9 @@ if __name__ == "__main__":
     "Erreur : voisinnage"
     print("Ok : voisinnage")
     
-    m.deplacer((3,3),(2,2))
+    m.deplacer((6,6),(5,5))
     
-    assert (isinstance(m.MAP[3,3][1],Rien) and isinstance(m.MAP[2,2][1],Animal_vide)), \
+    assert (isinstance(m.MAP[6,6][1],Rien) and isinstance(m.MAP[5,5][1],Animal_vide)), \
     "Erreur : deplacer"
     print("Ok : deplacer")
     

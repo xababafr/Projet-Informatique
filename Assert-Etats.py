@@ -22,7 +22,3 @@ class Ecosysteme:
         self.MAP = np.array(mappy2)
         self.LIVING = []
         
-if 1 == 2:
-    pass
-elif 2 == 3:
-    pass

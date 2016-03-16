@@ -17,7 +17,7 @@ class Animal():
         est defini dans plusieurs autres classes comportement
     """
        
-    def __init__(self,faim,soif,vision,vitesse,vie,position,rang,etat):
+    def __init__(self,ecosysteme,faim,soif,vision,vitesse,vie,position,rang,etat):
         """
             La position est un tuple (x,y) ( = position dans la matrice)
             Le rang est la position de l'animal dans la liste d'animaux
@@ -27,11 +27,12 @@ class Animal():
         
         # J'ai retire le parametre self.proie. En fait, il faudra bien faire un comportement different
         # pour herbivore et carnivore. Effectivement, le lapin recherche sa "proie" dans la premiere case
-        # d'une position de la ecosysteme.MAP (herbe), tandis que le carnivore la recherche dans la seconde case.
+        # d'une position de la self.ecosysteme.MAP (herbe), tandis que le carnivore la recherche dans la seconde case.
         # un algo différent sera donc a implementer
         
-        #ecosysteme.MAP = ecosysteme.MAP
+        #self.ecosysteme.MAP = self.ecosysteme.MAP
         #self.LIVING = LIVING
+        self.ecosysteme = ecosysteme
         self._faim = faim
         self._soif = soif
         self.vision = vision
@@ -39,6 +40,7 @@ class Animal():
         self.vie = vie
         self._position = position
         self.rang = rang
+        self.rang_naturel = rang+1
         self._etat = etat
         
     # à surcharger
@@ -86,6 +88,21 @@ class Animal():
             self._soif = 24
         if self._soif < 0:
             self._soif = 0
+            
+    
+    # modifie une position si celle-ci sort de la map
+    def position_correcte(self,p):
+        x,y = p[0],p[1]
+        if x < 0:
+            x = 0
+        if x >= self.ecosysteme.MAP.dim:
+            x = self.ecosysteme.MAP.dim-1
+        if y < 0:
+            y = 0
+        if y >= self.ecosysteme.MAP.dim:
+            y = self.ecosysteme.MAP.dim-1
+        return (x,y)
+        
 
     # De même, on vérifie que la position ne dépasse jamais les limites de la map
     # Deux solutions : les bords de la map sont des murs, ou
@@ -96,25 +113,16 @@ class Animal():
     def position(self):
         return self._position
 
-    ## On suppose l'exisence d'un attribut dim dans ecosysteme.MAP, qui est la dimension de l'array numpy
+    ## On suppose l'exisence d'un attribut dim dans self.ecosysteme.MAP, qui est la dimension de l'array numpy
     @position.setter
     def position(self,p):
-        x,y = p[0],p[1]
-        if x < 0:
-            x = 0
-        if x > ecosysteme.MAP.dim:
-            x = ecosysteme.MAP.dim-1
-        if y < 0:
-            y = 0
-        if y > ecosysteme.MAP.dim:
-            y = ecosysteme.MAP.dim-1
-        self._position = (x,y)
+        self._position = self.position_correcte((p[0],p[1]))
 
     # Enfin, je met l'état actuel en lecture seule, on a pas trop envie que ce paramètre soit bidouillé
     @property 
     def etat(self):
         # Suppose la surcharge de __str__ dans chaque état
-        return(str(self._etat))
+        return(self._etat)
 
     def __str__(self):
         texte = 'faim : {} \nsoif : {} \nvision : {} \nvitesse : {} \nvie : {} \nposition : {}\nrang : {}\netat : {} \n'.format(self.faim,self.soif,self.vision,self.vitesse,self.vie,self.position,self.rang,self.etat)
@@ -133,18 +141,26 @@ class Animal():
         if (self.faim == 0 or self.soif == 0 or self.vie == 0):
             self.mourir()
         else:
-            (self.etat).action()
+            (self.etat).action(self)
             
     def mourir(self):
+        # supprime l'animal de living et map
+        # les animaux faisant appel à un_tour() etant tous dans living, l'animal n'est
+        # plus utilisé, et le ramsse-miette devrait le supprimer, vu que toutes ses references ont disparues
+        # meme si ce n'est pas le cas, tant que l'animal est supprimé es deux, tout est ok
+        
         """
-            ecosysteme.MAP est l'objet global représentant la carte des animaux
+            self.ecosysteme.MAP est l'objet global représentant la carte des animaux
             LIVING est la liste des animaux vivants
         """
-        ecosysteme.MAP.suppression(self.position) # Créer une méthode suppression dans ecosysteme.MAP
-        # Comme on supprime un élèment de LIVING, le rang de tous ceux derriere celui de l'animal supprimé diminue de 1
-        for a in ecosysteme.LIVING[self.rang+1:]:
-            a.rang -= 1
-        del ecosysteme.LIVING[self.rang]
+        self.ecosysteme.MAP.suppression(self.position) # Créer une méthode suppression dans self.ecosysteme.MAP
+        # Comme on supprime un élèment de LIVING, le rang de tous ceux derriere celui de l'animal supprimé diminue de 1,à condition de ne pas être le dernier animal de la liste, sinon, aucun rang ne change!
+        if (self.rang != len(self.ecosysteme.LIVING)-1):
+            print("DADA")
+            for a in self.ecosysteme.LIVING[self.rang+1:]:
+                a.rang -= 1
+        print("DODO")
+        del self.ecosysteme.LIVING[self.rang]
         
     def manger(self,quantite):
         # Pour le manger des predateurs, il faudra surcharger la méthode
@@ -156,30 +172,61 @@ class Animal():
         
     def deplacer(self,position2):
         # La position est un tuple(x2,y2)
-        ecosysteme.MAP.deplacer(self.position,position2) # Créer une méthode deplacer dans ecosysteme.MAP
+        self.ecosysteme.MAP.deplacer(self.position,position2) # Créer une méthode deplacer dans self.ecosysteme.MAP
         self.position = position2
+        
+        
+    def get_voisinnage(self):
+        return(self.ecosysteme.MAP.voisinnage(self.position,self.vision))
+        
+    def detecter_herbe(self):
+        """
+            Fonction qui renvoie False s'il n'y a pas d'herbe dans le voisinage, et 
+            qui renvoie la position (x,y) de la case d'eau la + proche si elle existe
+            elle renvoi la version locale(dans la voisinnage) de cette position
+        """
+        # V est un tableau n x n, ou n est la vision de l'animal 
+        x,y,v = self.position[0], self.position[1],self.vision
+        V = self.get_voisinnage()
+        self.ecosysteme.MAP.visible_to_printable(V)
+        taille = len(V)
+        # L'eau la plus proche de l'animal trouvée actuellement
+        herbe_trouvee = False
+        distance = self.ecosysteme.MAP.distance_max()
+        for i in range(taille):
+            for j in range(taille):
+                # Si c'est de l'herbe (on manipule un array numpy)
+                if V[i,j][0] == 0:
+                    # Si celle-ci est plus proche de l'animal que l'ancienne eau
+                    distance_locale = self.ecosysteme.MAP.distance(self.position,(i,j))
+                    if (distance_locale < distance):
+                        herbe_trouvee = (i,j)
+                        distance = distance_locale
+        return herbe_trouvee
         
     def detecter_eau(self):
         """
             Fonction qui renvoie False s'il n'y a pas d'eau dans le voisinage, et 
             qui renvoie la position (x,y) de la case d'eau la + proche si elle existe
+            elle renvoi la version locale(dans la voisinnage) de cette position
         """
         # V est un tableau n x n, ou n est la vision de l'animal 
         x,y,v = self.position[0], self.position[1],self.vision
-        V = ecosysteme.MAP.voisinnage(self.position,self.vision)
+        V = self.get_voisinnage()
+        self.ecosysteme.MAP.visible_to_printable(V)
         taille = len(V)
         # L'eau la plus proche de l'animal trouvée actuellement
         eau_trouvee = False
-        distance = ecosysteme.MAP.distance_max()
+        distance = self.ecosysteme.MAP.distance_max()
         for i in range(taille):
             for j in range(taille):
                 # Si c'est de l'eau (on manipule un array numpy)
                 if V[i,j][0] == 1:
                     # Si celle-ci est plus proche de l'animal que l'ancienne eau
-                    distance_locale = ecosysteme.MAP.distance(self.position,(i,j))
+                    distance_locale = self.ecosysteme.MAP.distance(self.position,(i,j))
                     if (distance_locale < distance):
                         #eau_trouvee = (i,j) ## TESSTTTTT
-                        eau_trouvee = (x+i-v,y+j-v)
+                        eau_trouvee = (i,j)
                         distance = distance_locale
         return eau_trouvee
 
@@ -187,14 +234,14 @@ class Animal():
     def detecter_herbivore(self):
         """
             Fonction qui renvoie False s'il n'y a pas d'autres herbivores dans le voisinage, et 
-            qui renvoi la position (x,y) de la case de l'herbivore le + proche si il est visible
+            qui renvoi la position locale (i,j) de la case de l'herbivore le + proche si il est visible
         """
         # V est un tableau n x n, ou n est la vision de l'animal 
-        V = ecosysteme.MAP.voisinnage(self.position,self.vision)
+        V = self.get_voisinnage()
         taille = len(V)
         # L'herbivore le plus proche de l'animal trouvé actuellement
         herbivore_trouve = False
-        distance = ecosysteme.MAP.distance_max()
+        distance = self.ecosysteme.MAP.distance_max()
         x,y,v = self.position[0],self.position[1],self.vision
         for i in range(taille):
             for j in range(taille):
@@ -202,9 +249,9 @@ class Animal():
                 # Si c'est un prédateur
                 if (V[i,j][1]).is_herbivore():
                     # Si celui-ci est plus proche de l'animal que l'ancien herbivore
-                    distance_locale = ecosysteme.MAP.distance(self.position,(i,j))
+                    distance_locale = self.ecosysteme.MAP.distance(self.position,(i,j))
                     if (distance_locale < distance):
-                        herbivore_trouve = (x+i-v,y+j-v)
+                        herbivore_trouve = (i,j)
                         distance = distance_locale
         return herbivore_trouve
 
@@ -212,15 +259,15 @@ class Animal():
     def detecter_predateur(self):
         """
             Fonction qui renvoie False s'il n'y a pas de prédateur dans le voisinnage, et 
-            qui renvoi la position (x,y) de la case du prédateur le + proche si il est visible
+            qui renvoi la position locale (i,j) de la case du prédateur le + proche si il est visible
         """
         # V est un tableau n x n, ou n est la vision de l'animal 
-        V = ecosysteme.MAP.voisinnage(self.position,self.vision)
+        V = self.get_voisinnage()
         x,y,v = self.position[0],self.position[1],self.vision
         taille = len(V)
         # Prédateur le plus proche de l'animal trouvé actuellement
         predateur_trouve = False
-        distance = ecosysteme.MAP.distance_max()
+        distance = self.ecosysteme.MAP.distance_max()
         for i in range(taille):
             for j in range(taille):
                 ## Ici, je suppose que dans la deuxième case de chaque position, il y a un objet possédant une
@@ -230,32 +277,52 @@ class Animal():
                 # Si c'est un prédateur
                 if ((V[i,j][1]).is_predateur()):
                     # Si cette distance est plus petite que l'ancienne
-                    distance_locale = ecosysteme.MAP.distance(self.position,(i,j))
+                    distance_locale = self.ecosysteme.MAP.distance(self.position,(i,j))
                     if (distance_locale < distance):
-                        predateur_trouve = (x+i-v,y+j-v)
+                        predateur_trouve = (i,j)
                         distance = distance_locale
         return predateur_trouve
+        
+        
+    """def distance_min_coins(self,position,vision):
+        # on nous passe une position (x+i,y+j)
+        # on veux retourner v2 et v3 tels que la position absolue
+        # de la case soit donnée, càd on revoit (x+i-v2,y+j-v3) où
+        # v2 = min(vision, distance_coin_x)
+        # v3 = min(vision, distance_coin_y)
+        
+        xr,yr = position[0],position[1]
+        
+        distance_min_x = min(xr,(self.ecosysteme.MAP.dim-1-xr))
+        distance_min_y = min(yr,(self.ecosysteme.MAP.dim-1-yr))
+        
+        v2,v3 = min(distance_min_x,vision), min(distance_min_y,vision)
+        
+        return(v2,v3)"""
         
 
     def deplacements_possibles(self):
         """
-            Check toutes les cases autour de l'animal, et renvoi la position de celles qui ne sont pas de l'eau, 
+            Check toutes les cases autour de l'animal, et renvoi la position de celles qui ne sont pas de la roche (3), 
             donc celles sur lesquelles il peut se déplacer
-            Pour une première approximation, on dira que l'on peux même marcher sur l'eau (juste des petites mares)
+            Pour une première approximation, on dira que l'on peux marcher sur l'eau (juste des petites mares)
+            cette fois-ci, on renvoi la position absolue
         """
+        
         # V est un tableau n x n, où n est la vision de l'animal
-        V=ecosysteme.MAP.voisinnage(self.position,self.vision)
+        V=self.ecosysteme.MAP.voisinnage(self.position,self.vision)
         x,y,v = self.position[0],self.position[1],self.vision
         # Les déplacements possibles seront inscrits dans une liste déplacement_possibles
         deplacement_possible = []
         taille = len(V)
-        position_eau = []
+        position_roche = []
         # On check toutes les cases de V
         for i in range (taille):
             for j in range (taille):
-                if V[i,j][0] == 1:
-                    position_eau.append((x+i-v,y+j-v))
+                if V[i,j][0] == 3:
+                    position_roche.append((x+i-v,y+j-v)) #inutile (et faux)
                 else :
+                    #v2,v3 = self.distance_min_coins((x+i,y+j),v)
                     deplacement_possible.append((x+i-v,y+j-v))
         return deplacement_possible
         
@@ -265,7 +332,7 @@ class Animal():
         """
         # V est un tableau n x n, ou n est la vision de l'animal 
         x,y,v = self.position[0], self.position[1], self.vision
-        voisinage = ecosysteme.MAP.voisinnage(self.position,self.vision)
+        voisinage = self.ecosysteme.MAP.voisinnage(self.position,self.vision)
         taille = len(voisinage)
         # taille contient un tableau numpy de la vision de l'animal
         deplacement_possible = []
@@ -281,20 +348,20 @@ class Animal():
                 if voisinage[i,j][1] == Herbivore:
                     position_copain = position_copain.append(i,j)
         # L'animal suit le 1er animal rencontré, je n'ai pas eu d'autre idée
-                    distance_animal_copain = self.MAP.distance(self.position,position_copain[0]))
+                    distance_animal_copain = self.MAP.distance(self.position,position_copain[0])
         # deplacement_possible contient la liste de toutes les positions situés dans le champ de vision de l'animal
-                    for i in range self.vision:
-                        for j in range self.vision
+                    for i in range(self.vision):
+                        for j in range(self.vision):
                             deplacement_possible.append(i,j)
         # deplacement_possible_ideal contient la liste de toutes les positions situés à une distance de 2 du copain                    
-                    for k in range len(deplacement_possible):
+                    for k in range(len(deplacement_possible)):
                         if self.MAP.distance(deplacement_possible[k],position_copain[0]) == 2:
                             deplacement_possible_ideal.append(deplacement_possible[k])
         # position_ideale contien la position la plus proche situé à une distance de 2 du copain
-                    for l in range len(deplacement_possible_ideale):
-                        position_ideale = min(self.MAP.distance(self.position, deplacement_possible_ideal[l])
+                    for l in range(len(deplacement_possible_ideale)):
+                        position_ideale = min(self.MAP.distance(self.position, deplacement_possible_ideal[l]))
         # on retourne LA position_ideale; si il n'y a pas de copain, on renvoit False
-                    return position_ideale
+                    return(position_ideale)
                 else:
                     return False
                 
@@ -307,8 +374,8 @@ class Herbivore(Animal):
     # l'etat est une instance de Normal_herbivore, dont on passe en argument l'animal ayant le comportement concerne (le constructeur de chaque etat prends en parametre l'objet animal concerne par le comportement)
     # le comportement a ainsi acces a toutes les methodes et attributs de l'animal, ce qui lui permet de prendre des decisions
 
-    def __init__(self,position,rang,etat):
-        super().__init__(24,24,3,1,120,position,rang,etat)
+    def __init__(self,ecosysteme,position,rang,etat):
+        super().__init__(ecosysteme,24,24,1,1,120,position,rang,etat)
         
     # à surcharger
     def is_herbivore(self):
@@ -327,7 +394,7 @@ class Herbivore(Animal):
         return (self.faim < 18)
         
     def a_soif(self):
-        return (self.soif < 18)
+        return (self.soif < 20)
     
     # Avoir peur c'est comme détecter un prédateur    
     # def a_peur(self): 
@@ -335,8 +402,8 @@ class Herbivore(Animal):
        
 class Solitaire(Animal):
     # Le prédateur solitaire se déplace vite et à une grande vision, mais a une durée de vie plus faible que les herbivores
-    def __init__(self,position,rang,etat):
-        super().__init__(24,24,6,3,72,position,rang,etat)
+    def __init__(self,ecosysteme,position,rang,etat):
+        super().__init__(ecosysteme,24,24,3,3,72,position,rang,etat)
         
     # est un prédateur
     def is_herbivore(self):
@@ -372,8 +439,8 @@ class Solitaire(Animal):
 class Meute(Animal):
     # Le prédateur en Meute se deplace vite et à une vision moyenne, mais a une durée de vie plus faible que les herbivores
     # Il ne faut pas leur donner une vue trop forte, sinon, il vont raser des troupeaux d'herbivores tout le temps
-    def __init__(self,position,rang,etat):
-        super().__init__(24,24,4,2,96,position,rang,etat)
+    def __init__(self,ecosysteme,position,rang,etat):
+        super().__init__(ecosysteme,24,24,2,2,96,position,rang,etat)
         
     # est un prédateur
     def is_herbivore(self):
@@ -410,7 +477,7 @@ class Meute(Animal):
 class Rien():
     
     def __init__(self):
-        pass
+        self.rang_naturel = 0
     
     def is_herbivore(self):
         return False
@@ -419,10 +486,10 @@ class Rien():
         return False
         
     
-if __name__ == "__main__":
+"""if __name__ == "__main__":
     
     # on a besoin d'une map pour tester les fonction de animal
-    # on va donc creer un ecosysteme contenant une instance de Map()
+    # on va donc creer un self.ecosysteme contenant une instance de Map()
     # on a aussi besoin d'objets etat,  ils peuvent etre vides pources tests, c'est suffisant
     
     from Map import *
@@ -448,7 +515,6 @@ if __name__ == "__main__":
             self.MAP = MAP
             self.LIVING = LIVING
     
-    
     lapin = Animal(12,15,2,1,480,(1,1),0,EtatA())
     loup = Animal(10,20,3,3,240,(3,3),1,EtatB())
     mouton = Animal(12,15,2,1,460,(5,5),2,EtatA())
@@ -472,7 +538,7 @@ if __name__ == "__main__":
     MAP = Map(mappy,rien)
     LIVING = [lapin,loup,mouton,cheval,chevre,lion]
     
-    ecosysteme = Ecosysteme(MAP,LIVING)
+    self.ecosysteme = Ecosysteme(MAP,LIVING)
     
     # on a initialisé toutes les variables / objets necessaires, on peut commencer les tests
     
@@ -481,7 +547,7 @@ if __name__ == "__main__":
     # les getter et setters ne sont pas appellés dans le constructeur de Animal, c'est vonlontaire
     # mais ça veut dire que lors de la création des animaux, on doit rentrer des infos valides
     
-    assert (lapin.faim == 24 and lapin.soif == 0 and lapin.position == (0,5) and lapin.etat == 'A'), \
+    assert (lapin.faim == 24 and lapin.soif == 0 and lapin.position == (0,5) and isinstance(lapin.etat,EtatA)), \
     "Erreur : getters et setters de faim, soif et position"
     print("Ok : getters et setters de faim, soif, position et etat")
     
@@ -492,11 +558,11 @@ if __name__ == "__main__":
     # on verifie que tout a bien été supprimé dans living
     # la fonction Map.suppression a déjà été vérifiée donc pas besoin de checker la carte également
     def check_mourir():
-        if len(ecosysteme.LIVING) != 5:
+        if len(self.ecosysteme.LIVING) != 5:
             return False
         else:
             for i in range(5):
-                if ecosysteme.LIVING[i].rang != i:
+                if self.ecosysteme.LIVING[i].rang != i:
                     return False
         return True
     
@@ -505,7 +571,7 @@ if __name__ == "__main__":
     
     lapin.changer_etat(EtatB())
     
-    assert (lapin.etat =='B'), "Erreur : changer_etat"
+    assert (isinstance(lapin.etat,EtatB)), "Erreur : changer_etat"
     print("Ok : changer etat")
     
     # si mourir() esr OK, un_tour() aussi, donc on verif' pas
@@ -513,7 +579,7 @@ if __name__ == "__main__":
     
     lapin.deplacer((2,2))
     
-    assert(isinstance(ecosysteme.MAP.infos((1,1))[1],Rien) and isinstance(ecosysteme.MAP.infos((2,2))[1],Animal) and lapin.position == (2,2)), "Erreur : deplacer"
+    assert(isinstance(self.ecosysteme.MAP.infos((1,1))[1],Rien) and isinstance(self.ecosysteme.MAP.infos((2,2))[1],Animal) and lapin.position == (2,2)), "Erreur : deplacer"
     print("Ok : deplacer")
     
     assert(mouton.detecter_eau() == (4,4) and mouton.detecter_herbivore() == (4,5) and lapin.detecter_predateur() == (2,1)), "Erreur : fonctions detecter_..."
@@ -529,3 +595,4 @@ if __name__ == "__main__":
 #carotte = Animal(3,1,5,3,3,7,3,8)
 #M = [[1,2,lapin],[3,carotte,4],[mouton,5,6]]
 #L = [lapin,carotte,mouton]
+"""

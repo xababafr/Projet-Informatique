@@ -43,7 +43,7 @@ class AStar():
 
 		for x in range(n):
 			for y in range(n):
-				value = (MAP[x,y][0] == 1)
+				value = (MAP[x,y][0] == 3)
 				self.cells.append(Cell(x,y,value))
 				
 		self.start = self.get_cell(start[0], start[1])
@@ -74,7 +74,7 @@ class AStar():
 		while cell.parent is not self.start:
 			cell = cell.parent
 			path.append((cell.x,cell.y))
-		return path
+		return (path[::-1])
 
 	def set_voisin(self, parent, voisin):
 		# on appelle cette fonction pour calculer les g, h et f d'une cellule, en connaissant sa cellule parente
@@ -118,12 +118,12 @@ if __name__ == "__main__":
 		
 
 	mappy = np.array([
-		[[0,Rien()],[0,Rien()],[0,Rien()],[0,Rien()],[0,Rien()],[1,Rien()]],
-		[[1,Rien()],[1,Rien()],[0,Rien()],[0,Rien()],[0,Rien()],[1,Rien()]],
-		[[0,Rien()],[0,Rien()],[0,Rien()],[1,Rien()],[0,Rien()],[0,Rien()]], 
-		[[0,Rien()],[1,Rien()],[1,Rien()],[0,Rien()],[0,Rien()],[1,Rien()]],
-		[[0,Rien()],[1,Rien()],[0,Rien()],[0,Rien()],[1,Rien()],[0,Rien()]],
-		[[0,Rien()],[1,Rien()],[0,Rien()],[0,Rien()],[0,Rien()],[0,Rien()]]
+		[[0,Rien()],[0,Rien()],[0,Rien()],[0,Rien()],[0,Rien()],[3,Rien()]],
+		[[3,Rien()],[3,Rien()],[0,Rien()],[1,Rien()],[0,Rien()],[3,Rien()]],
+		[[0,Rien()],[0,Rien()],[0,Rien()],[3,Rien()],[0,Rien()],[0,Rien()]], 
+		[[0,Rien()],[3,Rien()],[3,Rien()],[0,Rien()],[1,Rien()],[3,Rien()]],
+		[[0,Rien()],[3,Rien()],[0,Rien()],[0,Rien()],[3,Rien()],[0,Rien()]],
+		[[0,Rien()],[3,Rien()],[0,Rien()],[0,Rien()],[0,Rien()],[0,Rien()]]
 	])
 	
 	start,end = (0,0) , (5,5)
@@ -133,10 +133,8 @@ if __name__ == "__main__":
 	
 	def check_path(path):
 		for t in path:
-			if (mappy[t[0],t[1]][0] == 1):
+			if (mappy[t[0],t[1]][0] == 3):
 				return False
-		if (path[0] != end):
-			return False
 		return True
 		
 	assert check_path(path), "Erreur : pathfinder"
