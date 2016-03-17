@@ -7,6 +7,10 @@
 
 ## penser à revérifier le décorateur de la position
 
+## un animal peux potentiellement etre bodyblock et donc ne pas pouvoir bouger : pr l'istant
+## ce cas n'est pas pris en compte
+## en fait si, dans ce cas là, je fais un deplacement aléatoire (je suis trop fort)
+
 """le probleme de liste index out of range sur tigre.un_tour() : 
 
 quand je fais (x+i-v, .. ) si v est trop grand, on passe en 
@@ -46,13 +50,27 @@ class Etat():
 		return (p1-x+v,p2-y+v)
 		
 	def deplacement_aleatoire(self,animal):
+		
 		position = animal.position
 		case_disponible = animal.deplacements_possibles()
 		deplacement_proximite = [(position[0]+1,position[1]),(position[0]-1,position[1]),(position[0],position[1]+1),(position[0],position[1]-1),(position[0]+1,position[1]+1), (position[0]+1,position[1]-1),(position[0]-1,position[1]-1), (position[0]-1,position[1]+1)]
 		
+		dep = deplacement_proximite.copy()
+		
+		# les herbivores doivent éviter de collisionner les autres animaux
+		# les solitaires doivent éviter de colllisionner leurs semblables
+		# donc ils evitent tous les solitaires et les herbivores evitetn aussi leur semblables
+		for i in range(len(deplacement_proximite)):
+			x,y = deplacement_proximite[i][0],deplacement_proximite[i][1]
+			if isinstance(animal.ecosysteme.MAP.MAP[x,y][1],Solitaire):
+				dep.remove(deplacement_proximite[i])
+			if isinstance(animal,Herbivore):
+				if isinstance(animal.ecosysteme.MAP.MAP[x,y][1],Herbivore):
+					dep.remove(deplacement_proximite[i])
+		
 		"""# uniquement les cases voisines, deplacement en diagonale interdit, comme pour le pathfinder
 		deplacement_proximite = [(position[0]+1,position[1]),(position[0]-1,position[1]),(position[0],position[1]+1),(position[0],position[1]-1)]"""
-		deplacement_proximite2 = deplacement_proximite.copy()
+		deplacement_proximite2 = dep.copy()
 		# On cherche toutes les cases disponibles à proximité	
 		for k in range(len(deplacement_proximite)):
 			if (deplacement_proximite[k] not in case_disponible):
@@ -65,7 +83,7 @@ class Etat():
 		
 ## Terminé
 class Solitaire_normal(Etat):
-	def action(self):
+	def action(self,animal):
 		print("NORMAL")
 		
 		# transitions
@@ -137,7 +155,8 @@ class Solitaire_soif(Etat):
 
 					else: # si chemin à trouver il y a bien
 					
-						astar = AStar(animal.get_voisinnage(),pos,eau_trouvee)
+						astar = PathFinderS(animal.get_voisinnage(),pos,eau_trouvee)
+						#astar = AStar(animal.get_voisinnage(),pos,eau_trouvee)
 						chemin = astar.find_path()
 						if (not chemin): # s'il n'y a pas de chemin 
 							print("not chemin")
@@ -231,7 +250,7 @@ class Herbivore_soif(Etat):
 
 				else: # si chemin à trouver il y a bien
 				
-					astar = AStar(animal.get_voisinnage(),pos,eau_trouvee)
+					astar = PathFinderH(animal.get_voisinnage(),pos,eau_trouvee)
 					chemin = astar.find_path()
 					if (not chemin): # s'il n'y a pas de chemin 
 						print("not chemin")
@@ -304,7 +323,7 @@ class Herbivore_faim(Etat):
 
 				else: # si chemin à trouver il y a bien
 				
-					astar = AStar(animal.get_voisinnage(),pos,herbe_trouvee)
+					astar = PathFinderH(animal.get_voisinnage(),pos,herbe_trouvee)
 					chemin = astar.find_path()
 					if (not chemin): # s'il n'y a pas de chemin 
 						print("not chemin")
@@ -373,6 +392,12 @@ if __name__ == "__main__":
 	from Map import *
 	from AStar import *
 	
+	mappy = [
+		[[2,Rien()],[2,Rien()],[1,Rien()]],
+		[[3,Rien()],[3,Rien()],[3,Rien()]],
+		[[3,Rien()],[3,Rien()],[3,Rien()]]
+	]
+	
 	mappy2 = [
 		[[2,Rien()],[2,Rien()],[2,Rien()],[2,Rien()],[2,Rien()],[2,Rien()]],
 		[[2,Rien()],[2,Rien()],[2,Rien()],[2,Rien()],[2,Rien()],[2,Rien()]],
@@ -394,14 +419,25 @@ if __name__ == "__main__":
 		# retourne le rang d'un animal qui viendrait a etre ajouté à la fin de LIVING
 		def get_rang(self):
 			return len(self.LIVING)
-		
+	
+	"""	
 	# test Solitaire_normal
 	ecosysteme = Ecosysteme(np.array(mappy2),[])
 	#tigre = Solitaire(ecosysteme,(4,3),ecosysteme.get_rang(),Solitaire_normal())
 	#ecosysteme.add_animal(tigre)
 	lapin = Herbivore(ecosysteme,(8,5),ecosysteme.get_rang(),Herbivore_normal())
 	ecosysteme.add_animal(lapin)
-
+	"""
+	
+	ecosysteme = Ecosysteme(np.array(mappy),[])
+	lapin = Herbivore(ecosysteme,(3,3),ecosysteme.get_rang(),Herbivore_normal())
+	ecosysteme.add_animal(lapin)
+	lapin2 = Herbivore(ecosysteme,(3,5),ecosysteme.get_rang(),Herbivore_normal())
+	ecosysteme.add_animal(lapin2)
+	#tigre = Solitaire(ecosysteme,(3,5),ecosysteme.get_rang(),Solitaire_normal())
+	#ecosysteme.add_animal(tigre)
+	#tigre2 = Solitaire(ecosysteme,(3,3),ecosysteme.get_rang(),Solitaire_normal())
+	#ecosysteme.add_animal(tigre2)
 
 ## Terminé
 class Solitaire_faim_soif(Etat):

@@ -90,7 +90,8 @@ class Map:
         Py = position[1]
         Dx = position2[0]
         Dy = position2[1]    
-        self.MAP[Dx,Dy][1] , self.MAP[Px,Py][1] = self.MAP[Px,Py][1] , self.MAP[Dx,Dy][1]
+        #self.MAP[Dx,Dy][1] , self.MAP[Px,Py][1] = self.MAP[Px,Py][1] , self.MAP[Dx,Dy][1]
+        self.MAP[Dx,Dy][1] , self.MAP[Px,Py][1] = self.MAP[Px,Py][1] , self.rien
         
     # besoin d'assert celle-ci?
     def add_animal(self,animal):

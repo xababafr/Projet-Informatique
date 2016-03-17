@@ -2,6 +2,10 @@
 
 import heapq
 import numpy as np
+import sys
+sys.path.append('/Users/xababafr/Documents/Projet-Informatique')
+from Animal import *
+
 
 ## le pathfinding ne marche pas deux fois d'affilees :
 # il faut creer un nouvel objet a chaque fois
@@ -37,10 +41,23 @@ class AStar():
 		# on travaillera toujours avec une grille carree
 		self.dim = n
 		
+		self.init_cells(n,MAP,start,end)
+		
 		##NON, VOIR EN DESSOUS
 		#self.start = Cell(start[0],start[1],False)
 		#self.end = Cell(end[0],end[1],False)
+		"""
+		for x in range(n):
+			for y in range(n):
+				value = (MAP[x,y][0] == 3)
+				self.cells.append(Cell(x,y,value))
+				
+		self.start = self.get_cell(start[0], start[1])
+		self.end = self.get_cell(end[0], end[1])
+		"""
 
+	def init_cells(self,n,MAP,start,end):
+		
 		for x in range(n):
 			for y in range(n):
 				value = (MAP[x,y][0] == 3)
@@ -109,6 +126,42 @@ class AStar():
 						
 						heapq.heappush(self.L_ouverte, (voisin.F, voisin))
 		return False
+
+
+class PathFinderH(AStar):
+	
+	#def __init__(self,MAP,start,end):
+		#super.__init__(MAP,start,end)
+	
+	# le pathfinder de l'herbivore considère tous les autres animaux comme des barrières
+	# car s'il marche sur leur cases, il les suppriment
+	def init_cells(self,n,MAP,start,end):
+		
+		for x in range(n):
+			for y in range(n):
+				value = (MAP[x,y][0] == 3 or isinstance(MAP[x,y][1],Animal))
+				self.cells.append(Cell(x,y,value))
+				
+		self.start = self.get_cell(start[0], start[1])
+		self.end = self.get_cell(end[0], end[1])
+
+class PathFinderS(AStar):
+	
+	#def __init__(self,MAP,start,end):
+		#super.__init__(MAP,start,end)
+	
+	# le pathfinder du solitaire considère les autres solitaires comme des barrières
+	# car s'il marche sur leur cases, il les suppriment
+	def init_cells(self,n,MAP,start,end):
+		
+		for x in range(n):
+			for y in range(n):
+				value = (MAP[x,y][0] == 3 or isinstance(MAP[x,y][1],Solitaire))
+				self.cells.append(Cell(x,y,value))
+				
+		self.start = self.get_cell(start[0], start[1])
+		self.end = self.get_cell(end[0], end[1])
+
 
 if __name__ == "__main__":
 		
