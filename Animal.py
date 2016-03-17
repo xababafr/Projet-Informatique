@@ -5,7 +5,7 @@
 import sys
 sys.path.append('/Users/xababafr/Documents/Projet-Informatique')
 import numpy as np
-
+from CustomList import *
 from abc import ABCMeta , abstractmethod
 #from Map import Map
 
@@ -139,6 +139,7 @@ class Animal():
         
         # Si on doit mourir
         if (self.faim == 0 or self.soif == 0 or self.vie == 0):
+            print("mort")
             self.mourir()
         else:
             (self.etat).action(self)
@@ -152,15 +153,16 @@ class Animal():
         """
             self.ecosysteme.MAP est l'objet global représentant la carte des animaux
             LIVING est la liste des animaux vivants
+            CORPSES est la liste des cadavres
         """
         self.ecosysteme.MAP.suppression(self.position) # Créer une méthode suppression dans self.ecosysteme.MAP
         # Comme on supprime un élèment de LIVING, le rang de tous ceux derriere celui de l'animal supprimé diminue de 1,à condition de ne pas être le dernier animal de la liste, sinon, aucun rang ne change!
         if (self.rang != len(self.ecosysteme.LIVING)-1):
-            print("DADA")
             for a in self.ecosysteme.LIVING[self.rang+1:]:
                 a.rang -= 1
-        print("DODO")
         del self.ecosysteme.LIVING[self.rang]
+        
+        self.ecosysteme.CORPSES.append(self)
         
     def manger(self,quantite):
         # Pour le manger des predateurs, il faudra surcharger la méthode
@@ -233,27 +235,28 @@ class Animal():
 
     def detecter_herbivore(self):
         """
-            Fonction qui renvoie False s'il n'y a pas d'autres herbivores dans le voisinage, et 
-            qui renvoi la position locale (i,j) de la case de l'herbivore le + proche si il est visible
+            Fonction qui renvoie False s'il n'y a pas d'herbivore dans le voisinage, et 
+            qui renvoie la position (x,y) de la case d'eau la + proche si elle existe
+            elle renvoi la version locale(dans la voisinnage) de cette position
         """
         # V est un tableau n x n, ou n est la vision de l'animal 
+        x,y,v = self.position[0], self.position[1],self.vision
         V = self.get_voisinnage()
+        self.ecosysteme.MAP.visible_to_printable(V)
         taille = len(V)
-        # L'herbivore le plus proche de l'animal trouvé actuellement
-        herbivore_trouve = False
+        # L'eau la plus proche de l'animal trouvée actuellement
+        herbivore_trouvee = False
         distance = self.ecosysteme.MAP.distance_max()
-        x,y,v = self.position[0],self.position[1],self.vision
         for i in range(taille):
             for j in range(taille):
-                ## De même, je suppose l'existence d'une méthode is_herbivore
-                # Si c'est un prédateur
-                if (V[i,j][1]).is_herbivore():
-                    # Si celui-ci est plus proche de l'animal que l'ancien herbivore
+                # Si c'est de l'herbe (on manipule un array numpy)
+                if (V[i,j][1].is_herbivore()):
+                    # Si celle-ci est plus proche de l'animal que l'ancienne eau
                     distance_locale = self.ecosysteme.MAP.distance(self.position,(i,j))
                     if (distance_locale < distance):
-                        herbivore_trouve = (i,j)
+                        herbivore_trouvee = (i,j)
                         distance = distance_locale
-        return herbivore_trouve
+        return herbivore_trouvee
 
 
     def detecter_predateur(self):
@@ -524,11 +527,11 @@ class Rien():
     
     mappy = np.array([
         [[0,Rien()],[0,Rien()],[0,Rien()],[0,Rien()],[0,Rien()],[1,Rien()]],
-        [[1,Rien()],[0, lapin],[0,Rien()],[0,Rien()],[0,Rien()],[1,Rien()]], #lapin
-        [[0,Rien()],[0,lion],[0,Rien()],[1,Rien()],[0,Rien()],[0,cheval]], #cheval
-        [[0,Rien()],[1,Rien()],[1,Rien()],[0,  loup],[0,Rien()],[1,Rien()]], #loup
-        [[0,Rien()],[1,Rien()],[0,Rien()],[0,Rien()],[1,Rien()],[0,chevre]], #chevre
-        [[0,Rien()],[1,Rien()],[0,Rien()],[0,Rien()],[0,Rien()],[0,mouton]] #mouton et lion
+        [[1,Rien()],[0,Rien()],[0,Rien()],[0,Rien()],[0,Rien()],[1,Rien()]], #lapin
+        [[0,Rien()],[0,Rien()],[0,Rien()],[1,Rien()],[0,Rien()],[0,Rien()]], #cheval
+        [[0,Rien()],[1,Rien()],[1,Rien()],[0,Rien()],[0,Rien()],[1,Rien()]], #loup
+        [[0,Rien()],[1,Rien()],[0,Rien()],[0,Rien()],[1,Rien()],[0,Rien()]], #chevre
+        [[0,Rien()],[1,Rien()],[0,Rien()],[0,Rien()],[0,Rien()],[0,Rien()]] #mouton et lion
     ])
     
     
@@ -588,11 +591,10 @@ class Rien():
     dpl = [(0, 0),(0, 1),(0, 2),(0, 3),(0, 4),(1, 1),(1, 2),(1, 3),(1, 4),(2, 0),(2, 1),(2, 2),(2, 4),(3, 0),(3, 3),(3, 4),(4, 0),(4, 2),(4, 3)]
     
     assert(lapin.deplacements_possibles() == dpl), "Erreur : deplacements possibles"
-    print("Ok : deplacements possibles")
+    print("Ok : deplacements possibles")"""
 
 #lapin = Animal(1,2,3,4,5,6,7,8)
 #mouton = Animal(2,1,4,3,5,7,6,8)
 #carotte = Animal(3,1,5,3,3,7,3,8)
 #M = [[1,2,lapin],[3,carotte,4],[mouton,5,6]]
 #L = [lapin,carotte,mouton]
-"""
