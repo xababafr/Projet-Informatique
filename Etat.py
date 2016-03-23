@@ -286,7 +286,203 @@ class Solitaire_faim_soif(Etat):
 				print("soif")
 			etat.apres_transition(animal)
 		
+## Charognard
+class Charognard(Etat):
+	def action(self,animal):
+		print("NORMAL")
+		
+		# transitions
+		if animal.a_faim() == True and animal.a_soif() == False:
+			animal.changer_etat(Charognard_faim())
+			animal.etat.action(animal)
+		elif animal.a_faim() == False and animal.a_soif() == True:
+			animal.changer_etat(Charognard_soif())
+			animal.etat.action(animal)
+		elif animal.a_faim() == True and animal.a_soif() == True:
+			animal.changer_etat(Charognard_faim_soif())
+			animal.etat.action(animal)
+		else:
+	# Se deplacer aléatoirement
+	# case_disponible est une liste des cases disponibles dans la vision de l'animal
+	# On supprime toutes les cases de proximité indisponible
+	# Solitaire se déplace aléatoirement sur une distance de "vitesse" case
+			for v in range(animal.vitesse):
+				animal.deplacer(self.deplacement_aleatoire(animal))
+				
+	# position est un tuple (i,j)
+	
+	
+class Charognard_soif(Etat):
+	
+	def apres_transition(self,animal):
+		for v in range(animal.vitesse):
+			# il faut à chaque tour rechercher de l'eau et refaire le pathfinder,
+			# car se deplacer aleatoirement peut positionner l'animal de maniere plus favorable
+			eau_trouvee = animal.detecter_eau()
+			
+			if not eau_trouvee:
+				print("not eau trouvee")
+				animal.deplacer(self.deplacement_aleatoire(animal))
+			else:
+				pos = self.global_to_local(animal,animal.position) # position locale de l'animal = (v,v)
+				print("ok eau trouvee : "+str(eau_trouvee)+" pos locale animal : "+str(pos))
+				# on se dirige vers l'eau avec le pathfinder
+				# la map est la vision de l'animal, le depart sa position, l'arrivee est l'eau trouvee
+				
+				# si on est sur la case où se trouve de l'eau
+				if eau_trouvee == pos:
+					print("glouglou")
+					animal.soif += 100 # le setter s'assure que la soif sera au maximum et correcte
+					# il faut s'assurer que le pathfinder ne soit jamais appelé, il renverrait sinon
+					# une erreur vu que depart = arrivée
+					# maintenant que l'animal n'a plus soif, on le fais bouger aléatoirement le nombre
+					# de fois qu'il lui reste (3 mvmts / tour) puis il passera à l'appel de un_tour()
+					# suivant dans un etat Solitaire_normal() !
+					
+					for k in range(2-v):
+						animal.deplacer(self.deplacement_aleatoire(animal))
+						# on sort du for v in range..
+					break
 
+				else: # si chemin à trouver il y a bien
+				
+					astar = PathFinderS(animal.get_voisinnage(),pos,eau_trouvee)
+					chemin = astar.find_path()
+					if (not chemin): # s'il n'y a pas de chemin 
+						print("not chemin")
+						animal.deplacer(self.deplacement_aleatoire(animal)) 
+					else:
+						print("ok chemin")
+						# s'il y en a un, on se deplace d'une case dans la bonne direction
+						# la methode deplacer demande la position absolue, et non relative
+						animal.deplacer(self.local_to_global(animal,chemin[0]))
+						# si ce deplacement l'a amené là ou il voulait se retrouver
+						"""if animal.position == self.local_to_global(animal,eau_trouvee):
+							print("glouglou")
+							animal.boire(100) # le setter s'assure que la soif sera au maximum et correcte"""
+					
+				# note : pas besoin de gerer la mort de soif pendant la "traque", celle-ci
+				# est gérée automatiquement dans l'appel de un_tour()
+	
+	def action(self,animal):
+		print("SOIF")
+		
+		# transitions
+		if animal.a_faim() == True and animal.a_soif() == False:
+			animal.changer_etat(Charognard_faim())
+			animal.etat.action(animal)
+		elif animal.a_faim() == False and animal.a_soif() == False:
+			animal.changer_etat(Charognard_normal())
+			animal.etat.action(animal)
+		# s'il a faim et soif
+		elif animal.a_faim() == True and animal.a_soif() == True:
+			animal.changer_etat(Charognard_faim_soif())
+			animal.etat.action(animal)
+		
+		else:
+			
+			self.apres_transition(animal)
+
+
+class Charognard_faim(Etat):
+	
+	def __init__(self):
+		self.chasse_reussie = False
+	
+	def apres_transition(self,animal):
+		
+		for v in range(animal.vitesse):
+			# il faut à chaque tour rechercher de l'eau et refaire le pathfinder,
+			# car se deplacer aleatoirement peut positionner l'animal de maniere plus favorable
+			herbivore_trouvee = animal.detecter_herbivore()
+			
+			if not mort_trouvee:
+				# si on est sur la case où se trouve de l'herbe
+				if self.chasse_reussie:
+					print("miammiam")
+					animal.faim += 100 # le setter s'assure que la faim sera au maximum et correcte
+					# il faut s'assurer que le pathfinder ne soit jamais appelé, il renverrait sinon
+					# une erreur vu que depart = arrivée
+					# maintenant que l'animal n'a plus faim, on le fais bouger aléatoirement le nombre
+					# de fois qu'il lui reste (3 mvmts / tour) puis il passera à l'appel de un_tour()
+					# suivant dans un etat Solitaire_normal() !
+					
+					for k in range(2-v):
+						animal.deplacer(self.deplacement_aleatoire(animal))
+					# et on sort du for v in...
+					break
+				else:
+					print("not mort trouvee")
+					animal.deplacer(self.deplacement_aleatoire(animal))
+			else:
+				pos = self.global_to_local(animal,animal.position) # position locale de l'animal = (v,v)
+				print("ok mort trouvee : "+str(mort_trouvee)+" pos locale animal : "+str(pos))
+				# on se dirige vers le mort avec le pathfinder
+				# la map est la vision de l'animal, le depart sa position, l'arrivee est le mort trouvee
+				
+				
+				astar = PathFinderS(animal.get_voisinnage(),pos,mort_trouvee)
+				chemin = astar.find_path()
+				if (not chemin): # s'il n'y a pas de chemin 
+					print("not chemin")
+					animal.deplacer(self.deplacement_aleatoire(animal)) 
+				else:
+					print("ok chemin")
+					# s'il y en a un, on se deplace d'une case dans la bonne direction
+					# la methode deplacer demande la position absolue, et non relative
+					
+					# quand on se deplace sur l'animal, on le supprime : du coup
+					# detecter_herbivore ne renvoi + rien, et par conséquent c'est
+					# comme si l'animal ne l'avait pas mangé
+					#remédions à ce problème
+					if chemin[0] == mort_trouvee:
+						self.chasse_reussie = True
+					animal.deplacer(self.local_to_global(animal,chemin[0]))
+	
+	
+	def action(self,animal):
+		print("FAIM")
+		
+		# transitions
+		if animal.a_faim() == False and animal.a_soif() == True:
+			animal.changer_etat(Charognard_soif())
+			animal.etat.action(animal)
+		elif animal.a_faim() == False and animal.a_soif() == False:
+			animal.changer_etat(Charognard_normal())
+			animal.etat.action(animal)
+		elif animal.a_faim() == True and animal.a_soif() == True:
+			animal.changer_etat(Charognard_faim_soif())
+			animal.etat.action(animal)
+				
+		else:
+			
+			self.apres_transition(animal)
+			
+class Charognard_faim_soif(Etat):
+	def action(self,animal):
+		
+		print("FAIM SOIF, ",end='')
+		
+		# transitions
+		if animal.a_faim() == False and animal.a_soif() == True:
+			animal.changer_etat(Charognard_soif())
+			animal.etat.action(animal)
+		elif animal.a_faim() == False and animal.a_soif() == False:
+			animal.changer_etat(Charognard_normal())
+			animal.etat.action(animal)
+		elif animal.a_faim() == True and animal.a_soif() == False:
+			animal.changer_etat(Charognard_faim())
+			animal.etat.action(animal)
+		else:
+			
+			if animal.faim < animal.soif:
+				etat = Solitaire_faim()
+				print("faim")
+			else:
+				etat = Solitaire_soif()
+				print("soif")
+			etat.apres_transition(animal)	
+			
 
 class Herbivore_normal(Etat):
 	def action(self,animal,faire_transitions = True):

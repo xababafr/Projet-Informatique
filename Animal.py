@@ -387,6 +387,9 @@ class Herbivore(Animal):
     def is_predateur(self):
         return False
         
+    def is_charognard(self):
+        reutrn False
+        
     
     # Pour faim et soif, je met une limite assez haute, car on ne veux pas qu'ils bougent trop
     # Les herbivores étant en général assez statiques
@@ -415,6 +418,9 @@ class Solitaire(Animal):
     def is_predateur(self):
         return True
     
+    def is_charognard(self):
+        return False
+    
     # Quand un prédateur se nourrit, on estime qu'il a assez mangé pour toute la journée : la faim repasse a 24
     # Comme on a défini un setter sur la faim, on peut simplement le nourrir de 24
 
@@ -435,9 +441,40 @@ class Solitaire(Animal):
     def a_soif(self):
         return (self.soif < 15)
 
+class Charognard(Animal):
+    # Le charognard se déplace vite et à une grande vision, mais a une durée de vie plus faible que les herbivores
+    def __init__(self,ecosysteme,position,rang,etat):
+        super().__init__(ecosysteme,24,24,3,3,72,position,rang,etat)
+        
+    # est un charogard
+    def is_herbivore(self):
+        return False
+        
+    def is_predateur(self):
+        return False
+        
+    def is_charognard(self):
+        return True
+    
+    # Quand un prédateur se nourrit, on estime qu'il a assez mangé pour toute la journée : la faim repasse a 24
+    # Comme on a défini un setter sur la faim, on peut simplement le nourrir de 24
 
+    def manger(self):
+        self.faim += 24
 
+    # Pour augmenter leur mobilité, on va aussi dire qu'ils n'ont besoin de boire que deux fois dans la journée
 
+    def boire(self):
+        self.faim += 12
+
+    # Essayons la faim à 8 : le solitaire a normalement suffisamment de ressources pour trouver une proie
+    def a_faim(self):
+        return (self.faim < 8)
+        
+    # Boire redonne 12, donc en comptant le temps de déplacement vers de l'eau, 
+    # commencer à en chercher à partir de 15 semble raisonnable
+    def a_soif(self):
+        return (self.soif < 15)
 
 class Meute(Animal):
     # Le prédateur en Meute se deplace vite et à une vision moyenne, mais a une durée de vie plus faible que les herbivores
@@ -487,6 +524,10 @@ class Rien():
     
     def is_predateur(self):
         return False
+        
+    def is_charognard(self):
+        return False
+    
         
     
 """if __name__ == "__main__":
