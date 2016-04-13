@@ -64,7 +64,7 @@ class Map:
     # herbe = 0
     # eau = 1
     # sol = 2
-    # cailou = 3
+    # caillou = 3
     
     """def coord_correcte(self,c):
         if c < 0:
@@ -99,12 +99,16 @@ class Map:
         self.MAP[x,y][1] = animal
         
     def suppression(self,position):
-        
         # position est un tuple (x,y)
         Px = position[0]
-        Py = position[1]
-        
+        Py = position[1]        
         self.MAP[Px,Py][1] = self.rien
+        
+    def conversion_mort(self,position):
+        # position est un tuple (x,y)
+        Px = position[0]
+        Py = position[1]        
+        self.MAP[Px,Py][1] = self.mort
         
     def distance_max(self):
         xmin = 0

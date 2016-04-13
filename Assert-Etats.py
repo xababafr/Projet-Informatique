@@ -18,7 +18,8 @@ mappy2 = [
 ]
 
 class Ecosysteme:
-    def __init__(self,MAP,LIVING):
+    def __init__(self,MAP,LIVING,CORPSES):
         self.MAP = np.array(mappy2)
         self.LIVING = []
+        self.CORPSES = []
         

@@ -22,7 +22,6 @@ class Animal():
             La position est un tuple (x,y) ( = position dans la matrice)
             Le rang est la position de l'animal dans la liste d'animaux
             Le comportement est une instance d'une des classes de comportement
-            
         """
         
         # J'ai retire le parametre self.proie. En fait, il faudra bien faire un comportement different
@@ -136,7 +135,6 @@ class Animal():
         self.vie -= 1
         self.faim -= 1
         self.soif -= 1
-        
         # Si on doit mourir
         if (self.faim == 0 or self.soif == 0 or self.vie == 0):
             print("mort")
@@ -155,14 +153,26 @@ class Animal():
             LIVING est la liste des animaux vivants
             CORPSES est la liste des cadavres
         """
-        self.ecosysteme.MAP.suppression(self.position) # Créer une méthode suppression dans self.ecosysteme.MAP
-        # Comme on supprime un élèment de LIVING, le rang de tous ceux derriere celui de l'animal supprimé diminue de 1,à condition de ne pas être le dernier animal de la liste, sinon, aucun rang ne change!
+        self.ecosysteme.MAP.conversion_mort(self.position) # Créer une méthode suppression dans self.ecosysteme.MAP
+        # Comme on supprime un élèment de LIVING, le rang de tous ceux derriere celui de l'animal supprimé diminue de 1,à              condition de ne pas être le dernier animal de la liste, sinon, aucun rang ne change!
         if (self.rang != len(self.ecosysteme.LIVING)-1):
             for a in self.ecosysteme.LIVING[self.rang+1:]:
                 a.rang -= 1
         del self.ecosysteme.LIVING[self.rang]
-        
         self.ecosysteme.CORPSES.append(self)
+        
+    def decomposition(self):
+        """
+            Méthode permettant de supprimer un cadavre de la liste CORPSES et de la carte 
+            Cet élément est définitivement éliminé
+        """
+         self.ecosysteme.MAP.suppression(self.position)
+         # Comme on supprime un élèment de LIVING, le rang de tous ceux derriere celui de l'animal supprimé diminue de 1,à condition de ne pas être le dernier animal de la liste, sinon, aucun rang ne change!
+        if (self.rang != len(self.ecosysteme.CORPSES)-1):
+            for a in self.ecosysteme.CORPSES[self.rang+1:]:
+                a.rang -= 1
+        del self.ecosysteme.CORPSES[self.rang]
+        
         
     def manger(self,quantite):
         # Pour le manger des predateurs, il faudra surcharger la méthode
@@ -236,7 +246,7 @@ class Animal():
     def detecter_herbivore(self):
         """
             Fonction qui renvoie False s'il n'y a pas d'herbivore dans le voisinage, et 
-            qui renvoie la position (x,y) de la case d'eau la + proche si elle existe
+            qui renvoie la position (x,y) de la case de l'herbivore le + proche si elle existe
             elle renvoi la version locale(dans la voisinnage) de cette position
         """
         # V est un tableau n x n, ou n est la vision de l'animal 
@@ -244,7 +254,7 @@ class Animal():
         V = self.get_voisinnage()
         self.ecosysteme.MAP.visible_to_printable(V)
         taille = len(V)
-        # L'eau la plus proche de l'animal trouvée actuellement
+        # L'herbivore le plus proche de l'animal trouvé actuellement
         herbivore_trouvee = False
         distance = self.ecosysteme.MAP.distance_max()
         for i in range(taille):
@@ -285,6 +295,32 @@ class Animal():
                         predateur_trouve = (i,j)
                         distance = distance_locale
         return predateur_trouve
+  
+     
+    def detecter_mort(self):
+    """
+        Fonction qui renvoie False s'il n'y a pas de cadavre dans le voisinage, et 
+        qui renvoie la position (x,y) de la case du cadavre le + proche si elle existe
+        elle renvoi la version locale(dans la voisinnage) de cette position
+    """
+    # V est un tableau n x n, ou n est la vision de l'animal 
+    x,y,v = self.position[0], self.position[1],self.vision
+    V = self.get_voisinnage()
+    self.ecosysteme.MAP.visible_to_printable(V)
+    taille = len(V)
+    # Le cadavre le plus proche de l'animal trouvé actuellement
+    mort_trouve = False
+    distance = self.ecosysteme.MAP.distance_max()
+    for i in range(taille):
+        for j in range(taille):
+            # on manipule un array numpy
+            if (V[i,j][1].is_mort()):
+                # Si le mort est plus proche de l'animal que l'ancien mort
+                distance_locale = self.ecosysteme.MAP.distance(self.position,(i,j))
+                if (distance_locale < distance):
+                    mort_trouve = (i,j)
+                    distance = distance_locale
+    return mort_trouve
         
         
     """def distance_min_coins(self,position,vision):
@@ -301,7 +337,8 @@ class Animal():
         
         v2,v3 = min(distance_min_x,vision), min(distance_min_y,vision)
         
-        return(v2,v3)"""
+        return(v2,v3)
+    """
         
 
     def deplacements_possibles(self):
@@ -333,7 +370,7 @@ class Animal():
         """
             Fonction pour que les herbivores et les meutes se regroupent lorsqu'ils se croisent
         """
-        # V est un tableau n x n, ou n est la vision de l'animal 
+        # v est un tableau n x n, ou n est la vision de l'animal 
         x,y,v = self.position[0], self.position[1], self.vision
         voisinage = self.ecosysteme.MAP.voisinnage(self.position,self.vision)
         taille = len(voisinage)
@@ -367,9 +404,33 @@ class Animal():
                     return(position_ideale)
                 else:
                     return False
-                
-                
-        
+    
+## En construction    
+    def reproduction_Herbivore(self,vision,vitesse,position):
+        """
+            Fonction permettant à nos animaux de se reproduire entre eux
+        """
+        # v est un tableau n x n, ou n est la vision de l'animal
+        x,y,v = self.position[0], self.position[1], self.vision
+        voisinage = self.ecosysteme.MAP.voisinnage(self.position,self.vision)
+        taille = len(voisinnage)
+        # taille contient un tableau numpy de la vision de l'animal
+        position_partenaire = []
+        partenaire = False
+        # Aucun animal n'a un champ de vision superieur à 10
+        distance = self.ecosysteme.MAP.distance_max()
+        for i in range(taille):
+            for j in range(taille):
+        # Si c'est un Herbivore (on manipule un array numpy)
+                if voisinage[i,j][1] == Herbivore:
+                    position_partenaire = position_partenaire.append(i,j)
+        # Pour se reproduire, les deux aniaux n'ont pas besoin d'être l'un à coté de l'autre. 
+                for k in range(position_partenaire):
+                    if self.MAP.distance(self.position, position_partenaire[k]) < distance:
+                        distance = self.MAP.distance(self.position, position_partenaire[k])
+                        partenaire = self.position
+                        
+                    
 
 class Herbivore(Animal):
 
@@ -378,7 +439,7 @@ class Herbivore(Animal):
     # le comportement a ainsi acces a toutes les methodes et attributs de l'animal, ce qui lui permet de prendre des decisions
 
     def __init__(self,ecosysteme,position,rang,etat):
-        super().__init__(ecosysteme,24,24,1,1,120,position,rang,etat)
+        super().__init__(ecosysteme,24,24,1,1,120,position,rang,etat)  #faim,soif,vision,vitesse,vie
         
     # à surcharger
     def is_herbivore(self):
@@ -388,8 +449,22 @@ class Herbivore(Animal):
         return False
         
     def is_charognard(self):
-        reutrn False
+        return False
         
+    def is_rien(self):
+        return False
+    
+    def is_mort(self):
+        return False
+        
+    def manger(self):
+        self.faim += 24
+
+    # Leur limite de soif étant haute, on peut considérer qu'ils récupèrent totalement après avoir bu.
+    #Idem pour la faim
+
+    def boire(self):
+        self.faim += 24
     
     # Pour faim et soif, je met une limite assez haute, car on ne veux pas qu'ils bougent trop
     # Les herbivores étant en général assez statiques
@@ -419,6 +494,12 @@ class Solitaire(Animal):
         return True
     
     def is_charognard(self):
+        return False
+    
+    def is_rien(self):
+        return False
+    
+    def is_mort(self):
         return False
     
     # Quand un prédateur se nourrit, on estime qu'il a assez mangé pour toute la journée : la faim repasse a 24
@@ -456,6 +537,12 @@ class Charognard(Animal):
     def is_charognard(self):
         return True
     
+    def is_rien(self):
+        return False
+        
+    def is_mort(self):
+        return False
+    
     # Quand un prédateur se nourrit, on estime qu'il a assez mangé pour toute la journée : la faim repasse a 24
     # Comme on a défini un setter sur la faim, on peut simplement le nourrir de 24
 
@@ -467,7 +554,7 @@ class Charognard(Animal):
     def boire(self):
         self.faim += 12
 
-    # Essayons la faim à 8 : le solitaire a normalement suffisamment de ressources pour trouver une proie
+    # Essayons la faim à 8 : le charognard a normalement suffisamment de ressources pour trouver une proie
     def a_faim(self):
         return (self.faim < 8)
         
@@ -475,44 +562,6 @@ class Charognard(Animal):
     # commencer à en chercher à partir de 15 semble raisonnable
     def a_soif(self):
         return (self.soif < 15)
-
-class Meute(Animal):
-    # Le prédateur en Meute se deplace vite et à une vision moyenne, mais a une durée de vie plus faible que les herbivores
-    # Il ne faut pas leur donner une vue trop forte, sinon, il vont raser des troupeaux d'herbivores tout le temps
-    def __init__(self,ecosysteme,position,rang,etat):
-        super().__init__(ecosysteme,24,24,2,2,96,position,rang,etat)
-        
-    # est un prédateur
-    def is_herbivore(self):
-        return False
-        
-    def is_predateur(self):
-        return True
-        
-    
-    # Quand un prédateur se nourrit, on estime qu'il a assez mangé pour toute la journée : la faim repasse a 24
-    # comme on a défini un setter sur la faim, on peut simplement le nourrir de 24
-
-    def manger(self):
-        self.faim += 24
-
-    # Pour augmenter leur mobilité, on va aussi dire qu'ils n'ont besoin de boire que deux fois dans la journée
-
-    def boire(self):
-        self.soif += 12
-
-    # Essayons la faim à 12 : la meute a besoin d'un tout petit peu plus de temps que le solitaire pour trouver une proie
-    # à cause de sa mobilité et de sa vision moins grande
-    def a_faim(self):
-        return (self.faim < 12)
-        
-    # Boire redonne 12, donc en comptant le temps de déplacement vers de l'eau, 
-    # commencer à en chercher à partir de 18 semble raisonnable
-    # Je met 18 ainsi, l'animal va "recharger" sa soif un peu avant d'avoir faim et de commencer sa traque d'animal : ainsi
-    # il peux faire sa traque entière sans descendre trop bas dans la soif
-    def a_soif(self):
-        return (self.soif < 18)
-
 
 class Rien():
     
@@ -527,8 +576,75 @@ class Rien():
         
     def is_charognard(self):
         return False
-    
+   
+    def is_rien(self):
+       return True
+       
+    def is_mort(self):
+        return False
         
+## Idee gestion des mort
+## Les morts sont des class aux même titre que les herbivores, les solitaires... Il faut alors retoucher la fonction initiale de Etat afin que seul les charognards puisse se déplacer sur les cases de cadavres (Si les cadavres se mettent à créer des labyrinthe infernaux, réduire leur durée de présence sur la carte)
+## Les morts sont des caractéristiques de la carte comme l'herbe ou l'eau sur lesquelles seul les charognards peuvent se déplacer. Il faut donc encore retoucher la class Etat afin que les autres type d'animaux ne puissent se déplacer sur ces cases (idem caillou)
+## Créer une méthode detecter_mort dans Animal
+class Mort():
+    def __init__(self,ecosysteme,position,rang,etat):
+        super().__init__(ecosysteme,24,24,0,0,10,position,rang,etat) # Pour l'instant les cadavres ont une vie de 10
+    
+    def is_herbivore(self):
+        return False
+    
+    def is_predateur(self):
+        return False
+        
+    def is_charognard(self):
+        return False
+        
+    def is_rien(self):
+         return False
+         
+    def is_mort(self):
+        return True
+    
+    
+# class Meute(Animal):
+#     # Le prédateur en Meute se deplace vite et à une vision moyenne, mais a une durée de vie plus faible que les herbivores
+#     # Il ne faut pas leur donner une vue trop forte, sinon, il vont raser des troupeaux d'herbivores tout le temps
+#     def __init__(self,ecosysteme,position,rang,etat):
+#         super().__init__(ecosysteme,24,24,2,2,90,position,rang,etat)
+#         
+#     # est un prédateur
+#     def is_herbivore(self):
+#         return False
+#         
+#     def is_predateur(self):
+#         return True
+#         
+#     def is_charognard(self):
+#         return False
+#     
+#     # Quand un prédateur se nourrit, on estime qu'il a assez mangé pour toute la journée : la faim repasse a 24
+#     # comme on a défini un setter sur la faim, on peut simplement le nourrir de 24
+# 
+#     def manger(self):
+#         self.faim += 24
+# 
+#     # Pour augmenter leur mobilité, on va aussi dire qu'ils n'ont besoin de boire que deux fois dans la journée
+# 
+#     def boire(self):
+#         self.soif += 12
+# 
+#     # Essayons la faim à 12 : la meute a besoin d'un tout petit peu plus de temps que le solitaire pour trouver une proie
+#     # à cause de sa mobilité et de sa vision moins grande
+#     def a_faim(self):
+#         return (self.faim < 12)
+#         
+#     # Boire redonne 12, donc en comptant le temps de déplacement vers de l'eau, 
+#     # commencer à en chercher à partir de 18 semble raisonnable
+#     # Je met 18 ainsi, l'animal va "recharger" sa soif un peu avant d'avoir faim et de commencer sa traque d'animal : ainsi
+#     # il peux faire sa traque entière sans descendre trop bas dans la soif
+#     def a_soif(self):
+#         return (self.soif < 18)
     
 """if __name__ == "__main__":
     

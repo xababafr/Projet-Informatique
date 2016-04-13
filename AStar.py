@@ -156,7 +156,24 @@ class PathFinderS(AStar):
 		
 		for x in range(n):
 			for y in range(n):
-				value = (MAP[x,y][0] == 3 or isinstance(MAP[x,y][1],Solitaire))
+				value = (MAP[x,y][0] == 3 or isinstance(MAP[x,y][1],Solitaire and Mort))
+				self.cells.append(Cell(x,y,value))
+				
+		self.start = self.get_cell(start[0], start[1])
+		self.end = self.get_cell(end[0], end[1])
+		
+class PathFinderC(AStar):
+	
+	#def __init__(self,MAP,start,end):
+		#super.__init__(MAP,start,end)
+	
+	# le pathfinder du charognard considère les autres animaux comme des barrières
+	# car s'il marche sur leur cases, il les suppriment
+	def init_cells(self,n,MAP,start,end):
+		
+		for x in range(n):
+			for y in range(n):
+				value = (MAP[x,y][0] == 3 or isinstance(MAP[x,y][1],Solitaire and Herbivore and Charognard))
 				self.cells.append(Cell(x,y,value))
 				
 		self.start = self.get_cell(start[0], start[1])

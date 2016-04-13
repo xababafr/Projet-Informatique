@@ -9,7 +9,7 @@
 
 ## un animal peux potentiellement etre bodyblock et donc ne pas pouvoir bouger : pr l'istant
 ## ce cas n'est pas pris en compte
-## en fait si, dans ce cas là, je fais un deplacement aléatoire (je suis trop fort)
+## en fait si, dans ce cas là, je fais un deplacement aléatoire (je suis trop fort) (Your name is God ;) )
 
 """le probleme de liste index out of range sur tigre.un_tour() : 
 
@@ -83,8 +83,7 @@ class Etat():
 		print('deplacer de '+str(position)+' à '+str(pos_future))
 		return(pos_future)
 		
-
-		
+## Solitaire		
 ## Terminé
 class Solitaire_normal(Etat):
 	def action(self,animal):
@@ -257,10 +256,9 @@ class Solitaire_faim(Etat):
 			animal.etat.action(animal)
 				
 		else:
-			
 			self.apres_transition(animal)
 			
-			
+## Terminé			
 class Solitaire_faim_soif(Etat):
 	def action(self,animal):
 		
@@ -285,9 +283,10 @@ class Solitaire_faim_soif(Etat):
 				etat = Solitaire_soif()
 				print("soif")
 			etat.apres_transition(animal)
-		
-## Charognard
-class Charognard(Etat):
+			
+## Charognard		
+## Terminé
+class Charognard_normal(Etat):
 	def action(self,animal):
 		print("NORMAL")
 		
@@ -311,7 +310,7 @@ class Charognard(Etat):
 				
 	# position est un tuple (i,j)
 	
-	
+## Terminé	
 class Charognard_soif(Etat):
 	
 	def apres_transition(self,animal):
@@ -337,7 +336,7 @@ class Charognard_soif(Etat):
 					# une erreur vu que depart = arrivée
 					# maintenant que l'animal n'a plus soif, on le fais bouger aléatoirement le nombre
 					# de fois qu'il lui reste (3 mvmts / tour) puis il passera à l'appel de un_tour()
-					# suivant dans un etat Solitaire_normal() !
+					# suivant dans un etat Charognard_normal() !
 					
 					for k in range(2-v):
 						animal.deplacer(self.deplacement_aleatoire(animal))
@@ -383,7 +382,7 @@ class Charognard_soif(Etat):
 			
 			self.apres_transition(animal)
 
-
+## Terminé
 class Charognard_faim(Etat):
 	
 	def __init__(self):
@@ -392,12 +391,12 @@ class Charognard_faim(Etat):
 	def apres_transition(self,animal):
 		
 		for v in range(animal.vitesse):
-			# il faut à chaque tour rechercher de l'eau et refaire le pathfinder,
+			# il faut à chaque tour rechercher le mort et refaire le pathfinder,
 			# car se deplacer aleatoirement peut positionner l'animal de maniere plus favorable
-			herbivore_trouvee = animal.detecter_herbivore()
+			mort_trouve = animal.detecter_mort()
 			
-			if not mort_trouvee:
-				# si on est sur la case où se trouve de l'herbe
+			if not mort_trouve:
+				# si on est sur la case où se trouve le mort
 				if self.chasse_reussie:
 					print("miammiam")
 					animal.faim += 100 # le setter s'assure que la faim sera au maximum et correcte
@@ -405,23 +404,23 @@ class Charognard_faim(Etat):
 					# une erreur vu que depart = arrivée
 					# maintenant que l'animal n'a plus faim, on le fais bouger aléatoirement le nombre
 					# de fois qu'il lui reste (3 mvmts / tour) puis il passera à l'appel de un_tour()
-					# suivant dans un etat Solitaire_normal() !
+					# suivant dans un etat Charognard_normal() !
 					
 					for k in range(2-v):
 						animal.deplacer(self.deplacement_aleatoire(animal))
 					# et on sort du for v in...
 					break
 				else:
-					print("not mort trouvee")
+					print("not mort trouve")
 					animal.deplacer(self.deplacement_aleatoire(animal))
 			else:
 				pos = self.global_to_local(animal,animal.position) # position locale de l'animal = (v,v)
-				print("ok mort trouvee : "+str(mort_trouvee)+" pos locale animal : "+str(pos))
+				print("ok mort trouve : "+str(mort_trouve)+" pos locale animal : "+str(pos))
 				# on se dirige vers le mort avec le pathfinder
-				# la map est la vision de l'animal, le depart sa position, l'arrivee est le mort trouvee
+				# la map est la vision de l'animal, le depart sa position, l'arrivee est le mort trouve
 				
 				
-				astar = PathFinderS(animal.get_voisinnage(),pos,mort_trouvee)
+				astar = PathFinderS(animal.get_voisinnage(),pos,mort_trouve)
 				chemin = astar.find_path()
 				if (not chemin): # s'il n'y a pas de chemin 
 					print("not chemin")
@@ -432,9 +431,9 @@ class Charognard_faim(Etat):
 					# la methode deplacer demande la position absolue, et non relative
 					
 					# quand on se deplace sur l'animal, on le supprime : du coup
-					# detecter_herbivore ne renvoi + rien, et par conséquent c'est
+					# detecter_mort ne renvoi + rien, et par conséquent c'est
 					# comme si l'animal ne l'avait pas mangé
-					#remédions à ce problème
+					# remédions à ce problème
 					if chemin[0] == mort_trouvee:
 						self.chasse_reussie = True
 					animal.deplacer(self.local_to_global(animal,chemin[0]))
@@ -455,9 +454,9 @@ class Charognard_faim(Etat):
 			animal.etat.action(animal)
 				
 		else:
-			
 			self.apres_transition(animal)
-			
+
+## Terminé			
 class Charognard_faim_soif(Etat):
 	def action(self,animal):
 		
@@ -483,7 +482,8 @@ class Charognard_faim_soif(Etat):
 				print("soif")
 			etat.apres_transition(animal)	
 			
-
+## Herbivore
+## Terminé
 class Herbivore_normal(Etat):
 	def action(self,animal,faire_transitions = True):
 		print("NORMAL")
@@ -503,7 +503,7 @@ class Herbivore_normal(Etat):
 			for v in range(animal.vitesse):
 				animal.deplacer(self.deplacement_aleatoire(animal))
 				
-			
+## Terminé
 class Herbivore_soif(Etat):
 	
 	def apres_transition(self,animal):
@@ -575,7 +575,7 @@ class Herbivore_soif(Etat):
 			
 			self.apres_transition(animal)
 					
-
+## Terminé
 class Herbivore_faim(Etat):
 	
 	def apres_transition(self,animal):
@@ -641,8 +641,7 @@ class Herbivore_faim(Etat):
 			
 			self.apres_transition(animal)
 
-							
-							
+## Terminé														
 class Herbivore_faim_soif(Etat):
 	def action(self,animal):
 		
@@ -887,7 +886,7 @@ if __name__ == "__main__":
 # Inclure un truc pour que les Herbivore reste en eux et se cherche
 #
 
-## Terminé
+## Autres
 """class Herbivore_normal(Etat):
 	def action(self,animal):
 		if animal.a_faim == True and animal.a_soif == False:
@@ -1153,7 +1152,7 @@ class Herbivore_faim_soif(Etat):
 
 
 
-## EN CONSTRUCTION
+## Autre
 #
 # Meute = problème il faudrait que toute la meute BOIVENT en même temps et MANGE en même temps
 #
