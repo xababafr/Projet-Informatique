@@ -406,6 +406,8 @@ class Animal():
                     return False
     
 ## En construction    
+## Création d'un compteur de bebe dans les caractéristiques des animaux
+## Les animaux se reproduise aléatoirement lorsqu'il se rencontrent et qu'ils ne sont pas stressés : 0.4 H ** 0.9 C et S
     def reproduction_Herbivore(self,vision,vitesse,position):
         """
             Fonction permettant à nos animaux de se reproduire entre eux
@@ -417,6 +419,8 @@ class Animal():
         # taille contient un tableau numpy de la vision de l'animal
         position_partenaire = []
         partenaire = False
+## Création d'un compteur de bebe dans les caractéristiques des animaux
+        bebe = self.bebe
         # Aucun animal n'a un champ de vision superieur à 10
         distance = self.ecosysteme.MAP.distance_max()
         for i in range(taille):
@@ -424,11 +428,13 @@ class Animal():
         # Si c'est un Herbivore (on manipule un array numpy)
                 if voisinage[i,j][1] == Herbivore:
                     position_partenaire = position_partenaire.append(i,j)
-        # Pour se reproduire, les deux aniaux n'ont pas besoin d'être l'un à coté de l'autre. 
+        # Pour se reproduire, les deux animaux n'ont pas besoin d'être l'un à coté de l'autre. 
                 for k in range(position_partenaire):
                     if self.MAP.distance(self.position, position_partenaire[k]) < distance:
                         distance = self.MAP.distance(self.position, position_partenaire[k])
                         partenaire = self.position
+        # Décrémenter les compteurs de bébé
+        # Faire pop le nouvel animal à un emplacement vide 
                         
                     
 
