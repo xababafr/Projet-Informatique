@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Interface</class>
+ <widget class="QDialog" name="Interface">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>541</width>
+    <height>380</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_2">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QSpinBox" name="boite1"/>
+     </item>
+     <item>
+      <widget class="QComboBox" name="comboBox">
+       <item>
+        <property name="text">
+         <string>+</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>-</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>*</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>/</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="boite2"/>
+     </item>
+     <item>
+      <widget class="QPushButton" name="Egalite">
+       <property name="text">
+        <string>=</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="Resultat">
+       <property name="text">
+        <string>Résultat</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

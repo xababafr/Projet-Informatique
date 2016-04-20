@@ -62,7 +62,7 @@ mappy2 = [
 ]
 
 class Ecosysteme:
-    def __init__(self,MAP,LIVING):
+    def __init__(self,MAP,LIVING,nbtours):
         self.MAP = Map(np.array(MAP),Rien())
         self.LIVING = LIVING
         self.CORPSES = CustomList()
@@ -74,7 +74,17 @@ class Ecosysteme:
     # retourne le rang d'un animal qui viendrait a etre ajouté à la fin de LIVING
     def get_rang(self):
         return len(self.LIVING)
-
+        
+    def unTour(self):
+        for i in LIVING: 
+            LIVING[i].unTour()
+            
+    def simuler(self):
+        for t in range(self.nbtours):
+            print("### Tour %i ###"%(t))
+            self.unTour()
+            print(self)
+            time.sleep(0.5)
 
 # test Solitaire_normal
 ecosysteme = Ecosysteme(np.array(mappy2),[])
