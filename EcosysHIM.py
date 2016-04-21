@@ -68,7 +68,7 @@ class EcosysUI(QtGui.QMainWindow): #Est ce que 'QtGui.QMainWindow' désigne la f
                     img = QtGui.QImage('roche.png')
                     qp.drawImage(i,j,img)
         for k in self.LIVING:
-            ##print(ins.__class__.__name__)
+            ##print(self.LIVING.__class__.__name__)
             img = QtGui.QImage(self.LIVING.__class__.__name__+".png")
             qp.drawImage(self.LIVING[k].x,self.LIVING[k].y,img)
         qp.end()

@@ -76,7 +76,7 @@ class Ecosysteme:
         return len(self.LIVING)
         
     def unTour(self):
-        for i in LIVING: 
+        for i in self.LIVING: 
             LIVING[i].unTour()
             
     def simuler(self):
