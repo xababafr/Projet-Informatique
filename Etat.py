@@ -238,7 +238,14 @@ class Solitaire_faim(Etat):
 					# comme si l'animal ne l'avait pas mangé
 					#remédions à ce problème
 					if chemin[0] == herbivore_trouvee:
+						# on a réussi notre chasse
 						self.chasse_reussie = True
+						
+						# on kille l'animal
+						x2,y2 = chemin[0][0], chemin[0][1]
+						victime = animal.ecosysteme.MAP.MAP[x2,y2][1]
+						victime.mourir()
+						
 					animal.deplacer(self.local_to_global(animal,chemin[0]))
 	
 	

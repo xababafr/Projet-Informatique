@@ -164,6 +164,9 @@ class Animal():
         
         self.ecosysteme.CORPSES.append(self)
         
+    def decomposition(self):
+        self.ecosysteme.CORPSES.delete(self)
+        
     def manger(self,quantite):
         # Pour le manger des predateurs, il faudra surcharger la méthode
         # car on a dit que lorsque qu'un prédateur mange, il remplit sa barre d'appétit
@@ -349,7 +352,7 @@ class Animal():
             for j in range(taille):
         # Si c'est un Herbivore (on manipule un array numpy)
                 if voisinage[i,j][1] == Herbivore:
-                    position_copain = position_copain.append(i,j)
+                    position_copain.append(i,j)
         # L'animal suit le 1er animal rencontré, je n'ai pas eu d'autre idée
                     distance_animal_copain = self.MAP.distance(self.position,position_copain[0])
         # deplacement_possible contient la liste de toutes les positions situés dans le champ de vision de l'animal
