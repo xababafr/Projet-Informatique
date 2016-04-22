@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-# Inheritance would be a better choice instead of this decorator but
-# we want to keep this code as simple as possible for the students
 
 
 class Node:
@@ -28,31 +26,6 @@ class CustomList:
         Create a new Node, set data as its content and put it as the beginning
         of the list
         """
-        # never erase the first (ghost) node, it is much easier to code
-        # a chained list this way as you will see in this tutorial. A ghost
-        # node is a Node with no content (None) put at the beginning of the
-        # list. It is used as a hidden and fixed reference to the beginning
-        # of the list. Beware, even if its content is None its next element
-        # will most probably be a Node and not the None object unless the list
-        # is empty.
-
-        # The list will look like this:
-
-        # Ghost-->1st "actual" node--->2nd node->...>last node-->None
-        #   |               |           |              |
-        #   |               |           |              |
-        #   |               |           |              |
-        # None         Some content     |              |
-        #                           Another content    |
-        #                                           Yet another one
-        #
-        #
-        # E.g if you build a list of integers, say 42, 12 and 69
-        # Ghost-->1st "real" node--->2nd node->last node-->None
-        #   |               |           |              |
-        #   |               |           |              |
-        #   |               |           |              |
-        # None             42          12             69
 
         # Now let's see how to insert an element at the beginning of the list
 

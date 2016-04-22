@@ -1,24 +1,5 @@
 # -*- coding: utf-8 -*-
 
-## de la meme maniere qu'au final j'ai du passer ecosysteme en
-## attribut de Animal(), il faudra ptet pour la meme raison
-## le passer en argument à ahcaque action() pour le faire 
-## transiter du main vers les autres fichiers
-
-## penser à revérifier le décorateur de la position
-
-## un animal peux potentiellement etre bodyblock et donc ne pas pouvoir bouger : pr l'istant
-## ce cas n'est pas pris en compte
-## en fait si, dans ce cas là, je fais un deplacement aléatoire (je suis trop fort)
-
-"""le probleme de liste index out of range sur tigre.un_tour() : 
-
-quand je fais (x+i-v, .. ) si v est trop grand, on passe en 
-negatif, du oup l'appel à la fonction position_correcte() 
-balance que des 0. Donc en fait faut pas faire x+i-v, mais :
-v2 = min(v distance_a_un_bord) puis (x+i-v2)
-"""
-
 import numpy as np
 #from abc import ABCMeta , abstractmethod
 from random import randint
@@ -61,16 +42,15 @@ class Etat():
 		
 		dep = deplacement_proximite.copy()
 		
-		# les herbivores doivent éviter de collisionner les autres animaux
-		# les solitaires doivent éviter de colllisionner leurs semblables
-		# donc ils evitent tous les solitaires et les herbivores evitetn aussi leur semblables
+# quand les herbivores sont en deplacement aléatoire, ils n'ont pas faim, ou viennent
+# juste de la rassasier. Donc meme les carnivores évitent les herbivores, ça ne les 
+# intéressent pas. Donc ici, les animaux se considèrent les uns les autres commes obstacles
+
 		for i in range(len(deplacement_proximite)):
 			x,y = deplacement_proximite[i][0],deplacement_proximite[i][1]
-			if isinstance(animal.ecosysteme.MAP.MAP[x,y][1],Solitaire):
+			if isinstance(animal.ecosysteme.MAP.MAP[x,y][1],Animal):
 				dep.remove(deplacement_proximite[i])
-			if isinstance(animal,Herbivore):
-				if isinstance(animal.ecosysteme.MAP.MAP[x,y][1],Herbivore):
-					dep.remove(deplacement_proximite[i])
+
 		
 		"""# uniquement les cases voisines, deplacement en diagonale interdit, comme pour le pathfinder
 		deplacement_proximite = [(position[0]+1,position[1]),(position[0]-1,position[1]),(position[0],position[1]+1),(position[0],position[1]-1)]"""
@@ -146,7 +126,8 @@ class Solitaire_soif(Etat):
 
 				else: # si chemin à trouver il y a bien
 				
-					astar = PathFinderS(animal.get_voisinnage(),pos,eau_trouvee)
+					## ICI, on prends le pathfinder de l'herbivore : le tigre n'a pas faim!
+					astar = PathFinderH(animal.get_voisinnage(),pos,eau_trouvee)
 					chemin = astar.find_path()
 					if (not chemin): # s'il n'y a pas de chemin 
 						print("not chemin")
@@ -199,8 +180,17 @@ class Solitaire_faim(Etat):
 			herbivore_trouvee = animal.detecter_herbivore()
 			
 			if not herbivore_trouvee:
-				# si on est sur la case où se trouve de l'herbe
+				# si on est sur la case où se trouve de l'herbivore
 				if self.chasse_reussie:
+					
+					## ici, il faut buter l'animal en le supprimant du living
+					L = animal.ecosysteme.LIVING
+					for ani in L:
+						# animal = le predateur, ani = on parcours la liste living
+						if ani.position == animal.position and isinstance(ani, Herbivore): 
+							ani.mourir(False)
+					# l'herbivore a déjà disparu de la carte => 2eme param de mourir = False
+					
 					print("miammiam")
 					animal.faim += 100 # le setter s'assure que la faim sera au maximum et correcte
 					# il faut s'assurer que le pathfinder ne soit jamais appelé, il renverrait sinon
@@ -238,14 +228,7 @@ class Solitaire_faim(Etat):
 					# comme si l'animal ne l'avait pas mangé
 					#remédions à ce problème
 					if chemin[0] == herbivore_trouvee:
-						# on a réussi notre chasse
 						self.chasse_reussie = True
-						
-						# on kille l'animal
-						x2,y2 = chemin[0][0], chemin[0][1]
-						victime = animal.ecosysteme.MAP.MAP[x2,y2][1]
-						victime.mourir()
-						
 					animal.deplacer(self.local_to_global(animal,chemin[0]))
 	
 	
@@ -564,463 +547,3 @@ if __name__ == "__main__":
 	lapin = Herbivore(ecosysteme,(8,5),ecosysteme.get_rang(),Herbivore_normal())
 	ecosysteme.add_animal(lapin)
 	
-	
-	"""ecosysteme = Ecosysteme(np.array(mappy),[])
-	lapin = Herbivore(ecosysteme,(3,3),ecosysteme.get_rang(),Herbivore_normal())
-	ecosysteme.add_animal(lapin)
-	lapin2 = Herbivore(ecosysteme,(3,5),ecosysteme.get_rang(),Herbivore_normal())
-	ecosysteme.add_animal(lapin2)
-	tigre = Solitaire(ecosysteme,(3,5),ecosysteme.get_rang(),Solitaire_normal())
-	ecosysteme.add_animal(tigre)
-	tigre2 = Solitaire(ecosysteme,(3,3),ecosysteme.get_rang(),Solitaire_normal())
-	ecosysteme.add_animal(tigre2)"""
-
-## Terminé
-"""class Solitaire_faim_soif(Etat):
-	
-	def action(self,animal):
-		print("FAIM SOIF")
-		case_disponible = animal.deplacements_possibles()
-	# case_disponible est une liste des cases disponibles
-		position = animal.position
-	# position est un tuple (i,j)
-		herbivore_trouve = animal.detecter_herbivore
-		eau_trouve = animal.detecter_eau
-	# herbivore_trouve = False si aucun d'herbivore n'est détecté ; eau_trouve = False si aucune case d'eau n'est détectée
-	# herbivore_trouve = (i,j) si un herbivore est trouvé dans le voisinage ; eau_trouve = (i,j) si une case d'eau est trouvée dans le voisinage
-	# On compare les paramètre faim et soif pour savoir à qui donner la priorité ; Si égalité, on donne la priorité à la soif
-		if animal.faim < animal.soif :
-			if herbivore_trouve == False:
-	# Se deplacer aléatoirement
-	# case_disponible est une liste des cases disponibles dans la vision de l'animal
-				deplacement_proximite = [(position[0]+1,position[1]),(position[0]-1,position[1]),(position[0],position[1]+1),(position[0],position[1]-1),(position[0]+1,position[1]+1), (position[0]+1,position[1]-1),(position[0]-1,position[1]-1), (position[0]-1,position[1]+1)]
-	# On supprime tout les cases de proximité indisponible
-	# Solitaire se déplace aléatoirement sur une distance de "vitesse" case
-				for k in range(animal.vitesse):
-	# On cherche toutes les cases disponibles à proximité	
-					for k in range(len(deplacement_proximité)):
-						if deplacement_proximite[k] not in case_disponible:
-							deplacement_proximite.remove(deplacement_proximite[k])
-	# On deplace l'animal
-					animal.deplacer(deplacement_proximite[random.randint(0,len(deplacement_proximite))])
-					position = animal.position
-					case_disponible = animal.deplacements_possibles()
-	# position est un tuple (i,j)
-					if animal.detecter_herbivore != False:
-	# Solitaire lance la chasse : Pathfinder
-						position_herbivore = animal.detecter_herbivore
-						while position != position_herbivore: # tant que le Solitaire n'est pas sur l'Herbivore
-							traque = AStar(mappy,position,position_herbivore)
-							if animal.faim == 0:
-								self.MAP.suppression(position)
-								animal.mourir() 
-							if animal.soif == 0:
-								self.MAP.suppression(position)
-								animal.mourir() 
-						animal.manger(100) # on remplit la barre d'appétit
-						position = animal.position
-	# si la faim arrive à 0, on fait mourir l'animal : suppression de MAP, suppression de LIVING
-				if animal.faim == 0:
-					self.MAP.suppression(position)
-					animal.mourir() 
-				if animal.soif == 0:
-					self.MAP.suppression(position)
-					animal.mourir() 
-			else: # animal.detecter_herbivore != False:
-	# Solitaire lance la chasse : Pathfinder
-				position_herbivore = animal.detecter_herbivore
-				while position != position_herbivore: # tant que le Solitaire n'est pas sur l'Herbivore
-					traque = AStar(mappy,position,position_herbivore)
-					if animal.faim == 0:
-						self.MAP.suppression(position)
-						animal.mourir() 
-					if animal.soif == 0:
-						self.MAP.suppression(position)
-						animal.mourir() 
-				animal.manger(100) # on remplit la barre d'appétit
-				position = animal.position
-		else:
-			if eau_trouve == False:
-	# Se deplacer aléatoirement
-	# case_disponible est une liste des cases disponibles dans la vision de l'animal
-				deplacement_proximite = [(position[0]+1,position[1]),(position[0]-1,position[1]),(position[0],position[1]+1),(position[0],position[1]-1),(position[0]+1,position[1]+1), (position[0]+1,position[1]-1),(position[0]-1,position[1]-1), (position[0]-1,position[1]+1)]
-	# On supprime tout les cases de proximité indisponible
-	# Solitaire se déplace aléatoirement sur une distance de "vitesse" case
-				for k in range(animal.vitesse):
-	# On cherche toutes les cases disponibles à proximité	
-					for k in range(len(deplacement_proximité)):
-						if deplacement_proximite[i] not in case_disponible:
-							deplacement_proximite.remove(deplacement_proximite[i])
-	# On deplace l'animal
-					animal.deplacer(deplacement_proximite[random.randint(0,len(deplacement_proximite))])
-					position = animal.position
-					case_disponible = animal.deplacements_possibles()
-	# position est un tuple (i,j)
-					if animal.detecter_eau != False:
-	# Solitaire se dirige vers la case d'eau : Pathfinder
-						position_eau = animal.detecter_eau
-						while position != position_eau: # tant que le Solitaire n'est pas sur l'eau
-							traque = AStar(mappy,position,position_eau)
-							if animal.faim == 0:
-								self.MAP.suppression(position)
-								animal.mourir() 
-							if animal.soif == 0:
-								self.MAP.suppression(position)
-								animal.mourir() 
-						animal.boire(100) # on remplit la barre de soif
-						position = animal.position
-	# si la soif arrive à 0, on fait mourir l'animal : suppression de MAP, suppression de LIVING
-				if animal.soif == 0:
-					self.MAP.suppression(position)
-					animal.mourir() 
-				if animal.faim == 0:
-					self.MAP.suppression(position)
-					animal.mourir()
-			else :
-	# Solitaire se dirige vers la case d'eau : Pathfinder
-				position_eau = animal.detecter_eau
-				while position != position_eau: # tant que le Solitaire n'est pas sur l'eau
-					traque = AStar(mappy,position,position_eau)
-					if animal.faim == 0:
-						self.MAP.suppression(position)
-						animal.mourir() 
-					if animal.soif == 0:
-						self.MAP.suppression(position)
-						animal.mourir() 
-				animal.boire(100) # on remplit la barre de soif
-				position = animal.position"""
-		
-#
-# Troupeau = problème : il faudrait que tous le troupeau MANGE en même temps et BOIT en même 
-#
-
-#
-# Inclure un truc pour que les Herbivore reste en eux et se cherche
-#
-
-## Terminé
-"""class Herbivore_normal(Etat):
-	def action(self,animal):
-		if animal.a_faim == True and animal.a_soif == False:
-			animal.changer_etat(Herbivore_faim)
-		elif animal.a_faim == False and animal.a_soif == True:
-			animal.changer_etat(Herbivore_soif)
-		elif animal.a_faim == True and animal.a_soif == True:
-			animal.changer_etat(Herbivore_faim_soif)
-		else:
-	# Se deplacer aléatoirement
-			case_disponible = animal.deplacements_possibles()
-	# case_disponible est une liste des cases disponibles dans la vision de l'animal
-			deplacement_proximite = [(position[0]+1,position[1]),(position[0]-1,position[1]),(position[0],position[1]+1),(position[0],position[1]-1),(position[0]+1,position[1]+1), (position[0]+1,position[1]-1),(position[0]-1,position[1]-1), (position[0]-1,position[1]+1)]
-	# On supprime toutes les cases de proximité indisponible
-	# Solitaire se déplace aléatoirement sur une distance de "vitesse" case
-			for k in range(animal.vitesse):
-	# On cherche toutes les cases disponibles à proximité	
-				for k in range(len(deplacement_proximité)):
-					if deplacement_proximite[k] not in case_disponible:
-						deplacement_proximite.remove(deplacement_proximite[k])
-	# On deplace l'animal
-				animal.deplacer(deplacement_proximite[random.randint(0,len(deplacement_proximite))])
-				position = animal.position
-				case_disponible = animal.deplacements_possibles()
-	# position est un tuple (i,j)
-
-## Terminé			
-class Herbivore_faim(Etat):
-	def action(self,animal):
-		case_disponible = animal.deplacements_possibles()
-	# case_disponible est une liste des cases disponibles dans la vision de l'animal
-		position = animal.position
-	# position est un tuple (i,j)
-		nourriture = []
-	# nourriture est une liste qui contient toutes les cases contenant de l'herbe
-		nourriture_distance = []
-	# sol = 0
-	# herbe = 1
-	# eau = 2
-		for k in case_disponible:
-			if mappy[case_disponible[k]][0] == 1:
-				nourriture = nourriture + case_disponible[k]
-				if len(nourriture) == 0:
-	# si pas d'herbe à proximité, on déplace l'animal
-					deplacement_proximite = [(position[0]+1,position[1]),(position[0]-1,position[1]),(position[0],position[1]+1),(position[0],position[1]-1),(position[0]+1,position[1]+1), (position[0]+1,position[1]-1),(position[0]-1,position[1]-1), (position[0]-1,position[1]+1)]
-	# On supprime tout les cases de proximité indisponible
-	# Solitaire se déplace aléatoirement sur une distance de "vitesse" case
-					for k in range(animal.vitesse):
-	# On cherche toutes les cases disponibles à proximité	
-						for k in range(len(deplacement_proximité)):
-							if deplacement_proximite[k] not in case_disponible:
-								deplacement_proximite.remove(deplacement_proximite[k])
-	# On deplace l'animal
-								animal.deplacer(deplacement_proximite[random.randint(0,len(deplacement_proximite))])
-								position = animal.position
-								case_disponible = animal.deplacements_possibles()
-	# position est un tuple (i,j)
-						for k in case_disponible:
-							if mappy[case_disponible[k]][0] == 1:
-								nourriture = nourriture + case_disponible[k]
-								if len(nourriture) != 0:
-	# on cherche la case d'herbe la plus proche
-									nourriture_distance = nourriture_distance+[self.MAP.distance(position,nourriture[k])]
-									for k in nourriture_distance:
-										nourriture_proche = min(nourriture_distance[k])
-	# nourriture_proche est la case d'herbe la plus proche
-									traque = AStar(mappy,position,nourriture_proche)
-									if animal.faim == 0:
-										self.MAP.suppression(position)
-										animal.mourir()
-									animal.deplacer(nourriture_proche)		
-									animal.manger(5) # on augmente la faim de 5 
-									position = animal.position
-	# on cherche la case d'herbe la plus proche
-	# si la faim arrive à 0, on fait mourir l'animal : suppression de MAP, suppression de LIVING
-					if animal.faim == 0:
-						self.MAP.suppression(position)
-						animal.mourir()
-				else:
-					nourriture_distance = nourriture_distance+[self.MAP.distance(position,nourriture[k])]
-					for k in nourriture_distance:
-						nourriture_proche = min(nourriture_distance[k])
-	# nourriture_proche est la case d'herbe la plus proche
-					traque = AStar(mappy,position,nourriture_proche)
-					if animal.faim == 0:
-						self.MAP.suppression(position)
-						animal.mourir()
-				animal.deplacer(nourriture_proche)		
-				animal.manger(5) # on augmente la faim de 5 
-				position = animal.position
-				
-				
-## Terminé			
-class Herbivore_soif(Etat):
-	def action(self,animal):
-		case_disponible = animal.deplacements_possibles()
-	# case_disponible est une liste des cases disponibles
-		position = animal.position
-	# position est un tuple (i,j)
-		eau_trouve = animal.detecter_eau
-	# eau_trouve = False si aucune case d'eau n'est détectée
-	# eau_trouve = (i,j) si une case d'eau est trouvée dans le voisinage	
-		if eau_trouve == False:
-	# Se deplacer aléatoirement
-	# case_disponible est une liste des cases disponibles dans la vision de l'animal
-			deplacement_proximite = [(position[0]+1,position[1]),(position[0]-1,position[1]),(position[0],position[1]+1),(position[0],position[1]-1),(position[0]+1,position[1]+1), (position[0]+1,position[1]-1),(position[0]-1,position[1]-1), (position[0]-1,position[1]+1)]
-	# On supprime tout les cases de proximité indisponible
-	# Herbivore se déplace aléatoirement sur une distance de "vitesse" case
-			for k in range(animal.vitesse):
-	# On cherche toutes les cases disponibles à proximité	
-				for k in range(len(deplacement_proximité)):
-					if deplacement_proximite[i] not in case_disponible:
-						deplacement_proximite.remove(deplacement_proximite[i])
-	# On deplace l'animal
-				animal.deplacer(deplacement_proximite[random.randint(0,len(deplacement_proximite))])
-				position = animal.position
-				case_disponible = animal.deplacements_possibles()
-	# position est un tuple (i,j)
-				if animal.detecter_eau != False:
-	# Herbivore se dirige vers la case d'eau : Pathfinder
-					position_eau = animal.detecter_eau
-					while position != position_eau: # tant que le Herbivore n'est pas sur l'eau
-						traque = AStar(mappy,position,position_eau)
-					animal.boire(100) # on remplit la barre de soif
-					position = animal.position
-	# si la soif arrive à 0, on fait mourir l'animal : suppression de MAP, suppression de LIVING
-			if animal.soif == 0:
-				self.MAP.suppression(position)
-				animal.mourir() 
-		else :
-	# Herbivore se dirige vers la case d'eau : Pathfinder
-			position_eau = animal.detecter_eau
-			while position != position_eau: # tant que le Herbivore n'est pas sur l'eau
-				traque = AStar(mappy,position,position_eau)
-			animal.boire(100) # on remplit la barre de soif
-			position = animal.position
-
-## Terminé
-class Herbivore_faim_soif(Etat):
-	def action(self,animal):
-		case_disponible = animal.deplacements_possibles()
-	# case_disponible est une liste des cases disponibles
-		position = animal.position
-	# position est un tuple (i,j)
-		eau_trouve = animal.detecter_eau
-	# eau_trouve = False si aucune case d'eau n'est détectée
-	# eau_trouve = (i,j) si une case d'eau est trouvée dans le voisinage
-	# On compare les paramètre faim et soif pour savoir à qui donner la priorité ; Si égalité, on donne la priorité à la soif
-		if animal.faim < animal.soif :
-			case_disponible = animal.deplacements_possibles()
-	# case_disponible est une liste des cases disponibles dans la vision de l'animal
-			position = animal.position
-	# position est un tuple (i,j)
-			nourriture = []
-	# nourriture est une liste qui contient toutes les cases contenant de l'herbe
-			nourriture_distance = []
-	# sol = 0
-	# herbe = 1
-	# eau = 2
-			for k in case_disponible:
-				if mappy[case_disponible[k]][0] == 1:
-					nourriture = nourriture + case_disponible[k]
-					if len(nourriture) == 0:
-	# si pas d'herbe à proximité, on déplace l'animal
-						deplacement_proximite = [(position[0]+1,position[1]),(position[0]-1,position[1]),(position[0],position[1]+1),(position[0],position[1]-1),(position[0]+1,position[1]+1), (position[0]+1,position[1]-1),(position[0]-1,position[1]-1), (position[0]-1,position[1]+1)]
-	# On supprime tout les cases de proximité indisponible
-	# Solitaire se déplace aléatoirement sur une distance de "vitesse" case
-					for k in range(animal.vitesse):
-	# On cherche toutes les cases disponibles à proximité	
-						for k in range(len(deplacement_proximité)):
-							if deplacement_proximite[k] not in case_disponible:
-								deplacement_proximite.remove(deplacement_proximite[k])
-	# On deplace l'animal
-								animal.deplacer(deplacement_proximite[random.randint(0,len(deplacement_proximite))])
-								position = animal.position
-								case_disponible = animal.deplacements_possibles()
-	# position est un tuple (i,j)
-						for k in case_disponible:
-							if mappy[case_disponible[k]][0] == 1:
-								nourriture = nourriture + case_disponible[k]
-								if len(nourriture) != 0:
-	# on cherche la case d'herbe la plus proche
-									nourriture_distance = nourriture_distance+[self.MAP.distance(position,nourriture[k])]
-									for k in nourriture_distance:
-										nourriture_proche = min(nourriture_distance[k])
-	# nourriture_proche est la case d'herbe la plus proche
-									traque = AStar(mappy,position,nourriture_proche)
-									if animal.faim == 0:
-										self.MAP.suppression(position)
-										animal.mourir()
-									animal.deplacer(nourriture_proche)		
-									animal.manger(5) # on augmente la faim de 5 
-									position = animal.position
-	# on cherche la case d'herbe la plus proche
-	# si la faim arrive à 0, on fait mourir l'animal : suppression de MAP, suppression de LIVING
-					if animal.faim == 0:
-						self.MAP.suppression(position)
-						animal.mourir()
-				else:
-					nourriture_distance = nourriture_distance+[self.MAP.distance(position,nourriture[k])]
-					for k in nourriture_distance:
-						nourriture_proche = min(nourriture_distance[k])
-	# nourriture_proche est la case d'herbe la plus proche
-					traque = AStar(mappy,position,nourriture_proche)
-					if animal.faim == 0:
-						self.MAP.suppression(position)
-						animal.mourir()
-				animal.deplacer(nourriture_proche)		
-				animal.manger(5) # on augmente la faim de 5 
-				position = animal.position
-		else:
-			if eau_trouve == False:
-	# Se deplacer aléatoirement
-	# case_disponible est une liste des cases disponibles dans la vision de l'animal
-				deplacement_proximite = [(position[0]+1,position[1]),(position[0]-1,position[1]),(position[0],position[1]+1),(position[0],position[1]-1),(position[0]+1,position[1]+1), (position[0]+1,position[1]-1),(position[0]-1,position[1]-1), (position[0]-1,position[1]+1)]
-	# On supprime tout les cases de proximité indisponible
-	# Herbivore se déplace aléatoirement sur une distance de "vitesse" case
-				for k in range(animal.vitesse):
-	# On cherche toutes les cases disponibles à proximité	
-					for k in range(len(deplacement_proximité)):
-						if deplacement_proximite[i] not in case_disponible:
-							deplacement_proximite.remove(deplacement_proximite[i])
-	# On deplace l'animal
-					animal.deplacer(deplacement_proximite[random.randint(0,len(deplacement_proximite))])
-					position = animal.position
-					case_disponible = animal.deplacements_possibles()
-	# position est un tuple (i,j)
-					if animal.detecter_eau != False:
-	# Herbivore se dirige vers la case d'eau : Pathfinder
-						position_eau = animal.detecter_eau
-						while position != position_eau: # tant que le Herbivore n'est pas sur l'eau
-							traque = AStar(mappy,position,position_eau)
-							if animal.faim == 0:
-								self.MAP.suppression(position)
-								animal.mourir() 
-							if animal.soif == 0:
-								self.MAP.suppression(position)
-								animal.mourir()
-						animal.boire(100) # on remplit la barre de soif
-						position = animal.position
-	# si la soif arrive à 0, on fait mourir l'animal : suppression de MAP, suppression de LIVING
-				if animal.soif == 0:
-					self.MAP.suppression(position)
-					animal.mourir() 
-				if animal.faim == 0:
-					self.MAP.suppression(position)
-					animal.mourir()
-			else :
-	# Herbivore se dirige vers la case d'eau : Pathfinder
-				position_eau = animal.detecter_eau
-				while position != position_eau: # tant que le Herbivore n'est pas sur l'eau
-					traque = AStar(mappy,position,position_eau)
-					if animal.faim == 0:
-						self.MAP.suppression(position)
-						animal.mourir() 
-					if animal.soif == 0:
-						self.MAP.suppression(position)
-						animal.mourir()
-				animal.boire(100) # on remplit la barre de soif
-				position = animal.position
-"""
-
-
-
-
-## EN CONSTRUCTION
-#
-# Meute = problème il faudrait que toute la meute BOIVENT en même temps et MANGE en même temps
-#
-
-#class Meute_normal(Etat):
-#	def action(self,animal):
-#		if animal.a_faim == True and animal.a_soif == False:
-#			animal.changer_etat(Meute_faim)
-#		elif animal.a_faim == False and animal.a_soif == True:
-#			animal.changer_etat(Meute_soif)
-#		elif animal.a_faim == False and animal.a_soif == False:
-#			animal.changer_etat(Meute_faim_soif)
-
-#
-# Inclure un truc pour que les meute reste entre eux et se cherche
-#
-			
-#class Meute_soif(Etat):
-#		def action(self,animal):
-#		case_disponible = animal.deplacements_possibles()
-#	# case_disponible est une liste des cases disponibles
-#		position = animal.position
-#	# position est un tuple (i,j)
-#		eau_trouve = animal.detecter_eau
-#	# eau_trouve = False si aucune case d'eau n'est détectée
-#	# eau_trouve = (i,j) si une case d'eau est trouvée dans le voisinage
-#		if eau_trouve == False:
-#	# Se deplacer aléatoirement
-#	# case_disponible est une liste des cases disponibles dans la vision de l'animal
-#			deplacement_proximite = [(position[0]+1,position[1]),(position[0]-1,position[1]),(position[0],position[1]+1),(position[0],position[1]-1),(position[0]+1,position[1]+1), (position[0]+1,position[1]-1),(position[0]-1,position[1]-1), (position[0]-1,position[1]+1)]
-#	# On supprime tout les cases de proximité indisponible
-#	# Meute se déplace aléatoirement sur une distance de "vitesse" case
-#			for k in range animal.vitesse:
-#	# On cherche toutes les cases disponibles à proximité	
-#				for k in range len(deplacement_proximité):
-#					if deplacement_proximite[i] is not in case_disponible:
-#						deplacement_proximite.remove(deplacement_proximite[i])
-	# On deplace l'animal
-#				animal.deplacer(deplacement_proximite[random.randint(0,len(deplacement_proximite))]
-#				position = animal.position
-	# position est un tuple (i,j)
-	# si la soif arrive à 0, on fait mourir l'animal : suppression de MAP, suppression de LIVING
-#			if animal.soif == 0:
-#				self.MAP.suppression(position)
-#				animal.mourir() 
-#			if animal.detecter_eau != False:
-#	# Meute se dirige vers la case d'eau : Pathfinder
-#				position_eau = animal.detecter_eau
-#				while position != position_eau: # tant que le Meute n'est pas sur l'eau
-#					traque = AStar(mappy,position,position_eau)
-#				animal.boire(100) # on remplit la barre de soif
-#				position = animal.position
-#		else :
-	# Meute se dirige vers la case d'eau : Pathfinder
-#			position_eau = animal.detecter_eau
-#			while position != position_eau: # tant que le Meute n'est pas sur l'eau
-#				traque = AStar(mappy,position,position_eau)
-#			animal.boire(100) # on remplit la barre de soif
-#			position = animal.position

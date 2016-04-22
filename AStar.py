@@ -135,6 +135,9 @@ class PathFinderH(AStar):
 	
 	# le pathfinder de l'herbivore considère tous les autres animaux comme des barrières
 	# car s'il marche sur leur cases, il les suppriment
+	
+	# c'est également le pathfinder du solitaire quand il n'a pas faim : 
+	# en effet, rassasié, le prédateur ne s'intéresse pas aux herbivores
 	def init_cells(self,n,MAP,start,end):
 		
 		for x in range(n):

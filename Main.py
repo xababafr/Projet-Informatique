@@ -37,8 +37,22 @@ PS : si ce main-ci bug, une version fonctionnelle se trouve dans le fichier Etat
 
 """
 
+# les prédateurs considérent également les herbivores comme des obstacles
+# seulement quand ils ont faim, leur pathfinder les autorisent à marcher sur les cases
+# et donc à les manger pour se rassasier
+
+# on considère que l'on peux marcher sur l'eau, genre ce sont des minis rivières / flaques
+# peut etre changer ça plus tard
+
+## TODO
+# 1) interface graphique
+# 2) comportement de groupe : somme des 1/d
+# 3) charognards
+# 4) fuite des herbivores, et une eau sur laquelle on ne peux pas marcher?
+# 5) autre?
+
 import sys
-sys.path.append('/Users/xababafr/Documents/Projet-Informatique')
+sys.path.append('/Users/xababafr/Documents/Projet-Informatique-Clean')
 import numpy as np
 from Animal import *
 from Map import *
@@ -47,7 +61,7 @@ from CustomList import *
 from Etat import *
 
 mappy = [
-    [[2,Rien()],[2,Rien()],[1,Rien()]],
+    [[2,Rien()],[2,Rien()],[2,Rien()]],
     [[3,Rien()],[3,Rien()],[3,Rien()]],
     [[3,Rien()],[3,Rien()],[3,Rien()]]
 ]
@@ -82,3 +96,8 @@ tigre = Solitaire(ecosysteme,(4,3),ecosysteme.get_rang(),Solitaire_normal())
 ecosysteme.add_animal(tigre)
 lapin = Herbivore(ecosysteme,(8,5),ecosysteme.get_rang(),Herbivore_normal())
 ecosysteme.add_animal(lapin)
+'''ecosysteme = Ecosysteme(np.array(mappy),[])
+tigre = Solitaire(ecosysteme,(3,3),ecosysteme.get_rang(),Solitaire_normal())
+ecosysteme.add_animal(tigre)
+lapin = Herbivore(ecosysteme,(3,5),ecosysteme.get_rang(),Herbivore_normal())
+ecosysteme.add_animal(lapin)'''

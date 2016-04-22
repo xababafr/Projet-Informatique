@@ -6,28 +6,6 @@
 # indice_sol = 0,1,2 = sol, eau, herbe (ou potentiellement des objets)
 # objet_animal = instance de la classe concernee
 
-# In [16]: a = Animal('gerard')
-# In [17]: L = [0,a]
-# In [18]: L2  =[0,0]
-# In [19]: L2[1] = L[1]
-# In [20]: L[1] = 0
-# In [21]: L2
-# Out[21]: [0, <__main__.Animal at 0x1097350b8>]
-# In [22]: L2[1].n
-# Out[22]: 'gerard'
-# In [23]: a
-# Out[23]: <__main__.Animal at 0x1097350b8>
-
-## truc utile : 
-# a = np.empty((50,50),dtype=object)
-# a[3,2] = Case()
-
-## array-numpy.tolist()
-# pour la vision aux frontieres, 2 solutoion : 
-# 1) riviere geante entourant la map de la taille de la vision max des animaux
-# 2) en dehors c'est le brouillard de guerre, si voisinnage renvoi [], on diminie les visions de 1
-# jusqu'a obtenir un array contenant de vraies infos (onreduit leur vision aux frontieres)
-
 import numpy as np
 from math import sqrt
 
@@ -65,14 +43,6 @@ class Map:
     # eau = 1
     # sol = 2
     # cailou = 3
-    
-    """def coord_correcte(self,c):
-        if c < 0:
-            return 0
-        elif c >= self.dim:
-            return (self.dim-1)
-        else:
-            return c"""
         
     # retourne un array vide si on est au bord et que la vision ne va pas sufissament loin
     def voisinnage(self,position,vision):
@@ -209,15 +179,4 @@ if __name__ == "__main__":
     assert (m.distance((0,0),(1,1)) == sqrt(2)), \
     "Erreur : distance"
     print("Ok : distance")
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
